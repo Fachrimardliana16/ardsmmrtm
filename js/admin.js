@@ -11,7 +11,6 @@
 
     const getToken = () => sessionStorage.getItem(TOKEN_KEY)
         || window.ARDSON_ADMIN_TOKEN
-        || new URLSearchParams(location.search).get('token')
         || '';
     const setToken = (t) => { sessionStorage.setItem(TOKEN_KEY, t); };
     const clearToken = () => { sessionStorage.removeItem(TOKEN_KEY); };
@@ -33,7 +32,11 @@
         logs: [],
         logSummary: { info: 0, warning: 0, error: 0 },
         logLevel: 'all',
-        filters: { jobs: '', seafarers: '', requests: '', insights: '', status: '', category: '', insightStatus: '' },
+        filters: {
+            jobs: '', seafarers: '', requests: '', insights: '',
+            status: '', category: '', insightStatus: '',
+            seafarerStatus: '', requestStatus: '', messageStatus: 'all'
+        },
         editingJobId: null,
         editingInsightId: null,
         editingSlideId: null,
@@ -49,6 +52,11 @@
     const escapeHtml = (str) => String(str == null ? '' : str)
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+
+    /** Rich text previews must never execute markup from stored data. */
+    const sanitizeHtml = (html) => (
+        window.ArdsonSanitize ? window.ArdsonSanitize.html(html) : escapeHtml(html)
+    );
 
     const money = (min, max) => {
         if (min == null && max == null) return '<span style="color:var(--muted)">Negotiable</span>';
@@ -72,7 +80,8 @@
             pending_verification: 'badge--pending',
             received: 'badge--unread',
             unread: 'badge--unread',
-            read: 'badge--read'
+            read: 'badge--read',
+            emergency: 'badge--unread'
         };
         const cls = map[status] || 'badge--muted';
         const label = String(status || 'unknown').replace(/_/g, ' ');
@@ -113,7 +122,7 @@
             }
             const res = await fetch(`${API}${path}`, opts);
             const data = await res.json().catch(() => ({}));
-            if (res.status === 401) {
+            if (res.status === 401 && path !== '/login') {
                 clearToken();
                 showToast('Session expired. Redirecting to sign in…', 'error');
                 setTimeout(() => window.location.replace(CFG.login || 'login.html'), 1200);
@@ -124,6 +133,52 @@
                 return { ok: false, status: 0, data: { message: 'Request timed out. Please try again.' } };
             }
             return { ok: false, status: 0, data: { message: 'Could not reach the API. Please check the connection.' } };
+        } finally {
+            clearTimeout(timer);
+        }
+    }
+
+    /**
+     * CVs are personal data, so the API requires an Authorization header.
+     * A plain <a href> cannot send one (and putting the token in the URL
+     * would leak it into history/logs), so fetch the file as a blob and
+     * hand it to the browser as a download.
+     */
+    async function downloadCv(id) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 20000);
+        try {
+            const res = await fetch(`${API}/seafarers/${encodeURIComponent(id)}/cv`, {
+                headers: { Authorization: `Bearer ${getToken()}` },
+                signal: controller.signal
+            });
+            if (res.status === 401) {
+                clearToken();
+                showToast('Session expired. Redirecting to sign in…', 'error');
+                setTimeout(() => window.location.replace(CFG.login || 'login.html'), 1200);
+                return;
+            }
+            if (!res.ok) {
+                showToast('Could not download that CV.', 'error');
+                return;
+            }
+            const blob = await res.blob();
+            const disposition = res.headers.get('Content-Disposition') || '';
+            const match = /filename="?([^";]+)"?/i.exec(disposition);
+            const filename = match ? match[1] : `CV-${id}`;
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        } catch (err) {
+            const message = err.name === 'AbortError'
+                ? 'The download timed out. Please try again.'
+                : 'Could not reach the API. Please check the connection.';
+            showToast(message, 'error');
         } finally {
             clearTimeout(timer);
         }
@@ -170,10 +225,14 @@
         $$('[data-metric]').forEach((el) => { el.textContent = String(stats[el.dataset.metric] ?? 0); });
         const totalHint = $('[data-metric-hint="totalJobs"]');
         if (totalHint) totalHint.textContent = `${stats.totalJobs} total published`;
+        const openHint = $('[data-metric-hint="openRequests"]');
+        if (openHint) openHint.textContent = String(stats.openRequests ?? stats.crewRequests ?? 0);
+        $$('[data-health]').forEach((el) => { el.textContent = String(stats[el.dataset.health] ?? 0); });
         updateNavCounts(stats);
 
         const seaList = $('[data-recent="seafarers"]');
         const reqList = $('[data-recent="requests"]');
+        const jobList = $('[data-recent="jobs"]');
         if (seaList) {
             const items = data.data.recentSeafarers || [];
             seaList.innerHTML = items.length
@@ -181,11 +240,11 @@
                     <div class="mini-item">
                         <div>
                             <strong>${escapeHtml(s.name || 'Unknown')}</strong>
-                            <span style="display:block">${escapeHtml(s.applied_rank || '—')}</span>
+                            <span class="sub">${escapeHtml(s.rank || s.applied_rank || '—')}</span>
                         </div>
-                        <span>${escapeHtml(s.reference || '')}</span>
+                        <span class="mini-item__meta">${escapeHtml(s.reference || '')}</span>
                     </div>`).join('')
-                : '<div class="mini-item"><span>No registrations yet.</span></div>';
+                : '<div class="mini-item mini-item--empty"><span>No registrations yet.</span></div>';
         }
         if (reqList) {
             const items = data.data.recentRequests || [];
@@ -194,12 +253,48 @@
                     <div class="mini-item">
                         <div>
                             <strong>${escapeHtml(r.company || 'Unknown')}</strong>
-                            <span style="display:block">${escapeHtml(r.vessel || '—')}</span>
+                            <span class="sub">${escapeHtml(r.vessel || '—')}</span>
                         </div>
-                        <span>${escapeHtml(r.reference || '')}</span>
+                        <span class="mini-item__meta">${statusBadge(r.status || 'new')}</span>
                     </div>`).join('')
-                : '<div class="mini-item"><span>No requests yet.</span></div>';
+                : '<div class="mini-item mini-item--empty"><span>No requests yet.</span></div>';
         }
+        if (jobList) {
+            const items = data.data.recentJobs || [];
+            jobList.innerHTML = items.length
+                ? items.map((j) => `
+                    <div class="mini-item">
+                        <div>
+                            <strong>${escapeHtml(j.title || 'Untitled')}</strong>
+                            <span class="sub">${escapeHtml(j.principal || '—')}</span>
+                        </div>
+                        <span class="mini-item__meta">${statusBadge(j.status || 'open')}</span>
+                    </div>`).join('')
+                : '<div class="mini-item mini-item--empty"><span>No vacancies yet.</span></div>';
+        }
+    }
+
+    function updateGreeting() {
+        const email = sessionStorage.getItem('ardson_admin_user') || 'admin@ardsonmaritime.com';
+        const handle = String(email).split('@')[0].replace(/[._-]+/g, ' ');
+        const first = handle.split(' ').filter(Boolean)[0] || 'Admin';
+        const name = first.charAt(0).toUpperCase() + first.slice(1);
+        $$('[data-admin-firstname]').forEach((el) => { el.textContent = name; });
+
+        const now = new Date();
+        const greeting = now.getHours() < 12 ? 'Good morning' : (now.getHours() < 18 ? 'Good afternoon' : 'Good evening');
+        $$('.admin-greeting').forEach((el) => {
+            const label = el.childNodes[0];
+            if (label && label.nodeType === Node.TEXT_NODE) label.textContent = `${greeting}, `;
+        });
+        const dateStr = now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        $$('[data-admin-datetime]').forEach((el) => { el.textContent = `${dateStr} · ${timeStr}`; });
+    }
+
+    function startClock() {
+        updateGreeting();
+        setInterval(updateGreeting, 1000);
     }
 
     function updateNavCounts(stats) {
@@ -252,14 +347,14 @@
         });
 
         tbody.innerHTML = rows.map((job) => `
-            <tr>
+            <tr data-row-id="${escapeHtml(job.id)}" tabindex="0">
                 <td>
                     <strong>${escapeHtml(job.title)}</strong>
                     <span class="sub">${escapeHtml(job.category || '')}</span>
                 </td>
                 <td>
                     ${escapeHtml(job.vessel_type)}
-                    ${job.vessel_name ? `<span class="sub">MV ${escapeHtml(job.vessel_name)}</span>` : ''}
+                    ${job.vessel_name ? `<span class="sub">${escapeHtml(/^mv\b/i.test(job.vessel_name) ? job.vessel_name : `MV ${job.vessel_name}`)}</span>` : ''}
                     ${job.flag_state ? `<span class="sub">Flag: ${escapeHtml(job.flag_state)}</span>` : ''}
                 </td>
                 <td>${escapeHtml(job.principal)}</td>
@@ -270,7 +365,7 @@
                     <div class="cell-actions">
                         <button type="button" class="btn btn--soft btn--sm" data-edit-job="${escapeHtml(job.id)}">Edit</button>
                         <button type="button" class="btn btn--ghost btn--sm" data-toggle-status="${escapeHtml(job.id)}">${job.status === 'open' ? 'Close' : 'Reopen'}</button>
-                        <button type="button" class="btn btn--ghost btn--sm" data-delete-job="${escapeHtml(job.id)}" style="color:var(--danger)">Delete</button>
+                        <button type="button" class="btn btn--ghost btn--danger btn--sm" data-delete-job="${escapeHtml(job.id)}">Delete</button>
                     </div>
                 </td>
             </tr>`).join('');
@@ -337,17 +432,23 @@
         submitBtn.disabled = true;
         submitBtn.textContent = 'Saving…';
 
+        // Send cleared fields as empty strings / null so edits can remove
+        // values. Omitting them would make PATCH silently keep the old value.
+        const optionalNumber = (sel) => {
+            const raw = $(sel).value.trim();
+            return raw === '' ? null : Number(raw);
+        };
         const payload = {
             title: $('#job-title').value.trim(),
             category: $('#job-category').value,
             vessel_type: $('#job-vessel-type').value,
-            vessel_name: $('#job-vessel-name').value.trim() || undefined,
+            vessel_name: $('#job-vessel-name').value.trim(),
             principal: $('#job-principal').value.trim(),
-            flag_state: $('#job-flag').value.trim() || undefined,
-            salary_min: $('#job-salary-min').value ? Number($('#job-salary-min').value) : undefined,
-            salary_max: $('#job-salary-max').value ? Number($('#job-salary-max').value) : undefined,
-            joining_date: $('#job-joining').value || undefined,
-            contract_duration: $('#job-duration').value.trim() || undefined,
+            flag_state: $('#job-flag').value.trim(),
+            salary_min: optionalNumber('#job-salary-min'),
+            salary_max: optionalNumber('#job-salary-max'),
+            joining_date: $('#job-joining').value || null,
+            contract_duration: $('#job-duration').value.trim(),
             status: $('#job-status').value
         };
 
@@ -425,7 +526,7 @@
         });
 
         tbody.innerHTML = rows.map((article) => `
-            <tr>
+            <tr data-row-id="${escapeHtml(article.id)}" tabindex="0">
                 <td>
                     <strong>${escapeHtml(article.title)}</strong>
                     <span class="sub">/${escapeHtml(article.slug)}</span>
@@ -441,7 +542,7 @@
                     <div class="cell-actions">
                         <button type="button" class="btn btn--soft btn--sm" data-edit-insight="${escapeHtml(article.id)}">Edit</button>
                         <button type="button" class="btn btn--ghost btn--sm" data-toggle-insight="${escapeHtml(article.id)}">${article.status === 'published' ? 'Unpublish' : 'Publish'}</button>
-                        <button type="button" class="btn btn--ghost btn--sm" data-delete-insight="${escapeHtml(article.id)}" style="color:var(--danger)">Delete</button>
+                        <button type="button" class="btn btn--ghost btn--danger btn--sm" data-delete-insight="${escapeHtml(article.id)}">Delete</button>
                     </div>
                 </td>
             </tr>
@@ -508,15 +609,17 @@
         submitBtn.disabled = true;
         submitBtn.textContent = 'Saving…';
 
+        // Empty strings clear optional fields on edit. The slug keeps its
+        // old value when blank because it is part of the public URL.
         const payload = {
             title: $('#insight-title').value.trim(),
             slug: $('#insight-slug').value.trim() || undefined,
-            tag: $('#insight-tag').value.trim() || undefined,
-            date: $('#insight-date').value || undefined,
-            read: $('#insight-read').value.trim() || undefined,
+            tag: $('#insight-tag').value.trim(),
+            date: $('#insight-date').value,
+            read: $('#insight-read').value.trim(),
             status: $('#insight-status').value,
-            image: $('#insight-image').value.trim() || undefined,
-            lede: $('#insight-lede').value.trim() || undefined,
+            image: $('#insight-image').value.trim(),
+            lede: $('#insight-lede').value.trim(),
             body: $('#insight-body').value
         };
 
@@ -573,70 +676,368 @@
         renderSeafarers();
     }
 
+    const SEAFARER_STATUSES = ['new', 'screening', 'verified', 'proposed', 'rejected'];
+
     function renderSeafarers() {
         const tbody = $('[data-table="seafarers"]');
         const empty = $('[data-table-empty="seafarers"]');
         if (!tbody) return;
         const q = state.filters.seafarers.toLowerCase();
+        const status = state.filters.seafarerStatus;
         const rows = state.seafarers.filter((s) => {
+            if (status && s.status !== status) return false;
             if (!q) return true;
-            const hay = `${s.name} ${s.email} ${s.phone || ''} ${s.applied_rank} ${s.reference || ''}`.toLowerCase();
+            const hay = `${s.name} ${s.email} ${s.phone || ''} ${s.applied_rank} ${s.vessel_experience || ''} ${s.reference || ''}`.toLowerCase();
             return hay.includes(q);
         });
         tbody.innerHTML = rows.map((s) => {
             const certs = Array.isArray(s.certifications) ? s.certifications : [];
             const certHtml = certs.length
-                ? certs.map((c) => `<span class="cert-pill">${escapeHtml(c)}</span>`).join(' ')
+                ? certs.slice(0, 4).map((c) => `<span class="cert-pill">${escapeHtml(c)}</span>`).join(' ')
                 : '<span class="sub">No certificates listed</span>';
+            const extra = certs.length > 4 ? `<span class="cert-pill cert-pill--more">+${certs.length - 4}</span>` : '';
             const cvLink = s.cv_file
-                ? `<a class="btn btn--soft btn--sm" href="/api/v1/admin/seafarers/${encodeURIComponent(s.id)}/cv" target="_blank" rel="noopener">CV</a>`
+                ? `<button type="button" class="btn btn--soft btn--sm" data-cv-download="${escapeHtml(s.id)}">CV</button>`
                 : '';
-            const statusActions = ['screening', 'verified', 'rejected', 'proposed']
-                .filter((st) => st !== s.status)
-                .map((st) => `<button type="button" class="btn btn--soft btn--sm" data-seafarer-status="${escapeHtml(s.id)}" data-next-status="${st}">${st[0].toUpperCase() + st.slice(1)}</button>`)
-                .join(' ');
-            const notesHtml = s.notes
-                ? `<div class="seafarer-notes"><strong>Notes:</strong> ${escapeHtml(s.notes)}<br><span class="sub">${escapeHtml(s.screened_by || '')} · ${formatDate(s.screened_at)}</span></div>`
-                : '';
+            const statusOptions = SEAFARER_STATUSES.map((st) =>
+                `<option value="${st}"${st === s.status ? ' selected' : ''}>${st[0].toUpperCase() + st.slice(1)}</option>`).join('');
             return `
-            <tr>
+            <tr data-row-id="${escapeHtml(s.id)}" tabindex="0">
                 <td><strong>${escapeHtml(s.reference || '—')}</strong></td>
                 <td>
                     <strong>${escapeHtml(s.name)}</strong>
                     <span class="sub">${escapeHtml(s.email)}</span>
                     <span class="sub">${escapeHtml(s.phone || '')}</span>
                 </td>
-                <td>${escapeHtml(s.applied_rank || '—')}</td>
-                <td>${escapeHtml(s.vessel_experience || '—')}</td>
                 <td>
-                    <div class="cell-certs">${certHtml}</div>
-                    ${notesHtml}
+                    <strong>${escapeHtml(s.applied_rank || '—')}</strong>
+                    <span class="sub">${escapeHtml(s.vessel_experience || 'No vessel experience')}</span>
                 </td>
+                <td><div class="cell-certs">${certHtml}${extra}</div></td>
                 <td>${formatDate(s.created_at)}</td>
                 <td>
+                    <select class="status-select status-select--${escapeHtml(s.status || 'new')}" data-seafarer-status-select="${escapeHtml(s.id)}" aria-label="Change status">
+                        ${statusOptions}
+                    </select>
+                </td>
+                <td>
                     <div class="cell-actions">
-                        ${statusBadge(s.status)}
+                        <button type="button" class="btn btn--soft btn--sm" data-seafarer-view="${escapeHtml(s.id)}">View</button>
                         ${cvLink}
                     </div>
-                    <div class="cell-actions">${statusActions}</div>
                 </td>
             </tr>`;
         }).join('');
         if (empty) empty.hidden = rows.length > 0;
-        $$('[data-seafarer-status]', tbody).forEach((b) => b.addEventListener('click', async () => {
-            const id = b.dataset.seafarerStatus;
-            const next = b.dataset.nextStatus;
+
+        $$('[data-seafarer-view]', tbody).forEach((b) => b.addEventListener('click', () => openSeafarerDetail(b.dataset.seafarerView)));
+        $$('[data-seafarer-status-select]', tbody).forEach((sel) => sel.addEventListener('change', async () => {
+            const id = sel.dataset.seafarerStatusSelect;
+            const next = sel.value;
+            sel.disabled = true;
             const { ok, data } = await api(`/seafarers/${encodeURIComponent(id)}`, {
                 method: 'PATCH',
-                body: JSON.stringify({ status: next })
+                body: { status: next }
             });
             if (ok) {
                 showToast(`Seafarer marked as ${next}.`, 'success');
                 await loadSeafarers();
             } else {
                 showToast(data?.message || 'Could not update the seafarer.', 'error');
+                sel.disabled = false;
             }
         }));
+    }
+
+    function openSeafarerDetail(id) {
+        const s = state.seafarers.find((row) => String(row.id) === String(id));
+        const modal = $('#seafarer-modal');
+        const detail = $('[data-seafarer-detail]');
+        if (!s || !modal || !detail) return;
+        const certs = Array.isArray(s.certifications) ? s.certifications : [];
+        const certHtml = certs.length
+            ? `<div class="cell-certs">${certs.map((c) => `<span class="cert-pill">${escapeHtml(c)}</span>`).join(' ')}</div>`
+            : '<p class="muted">No certificates on file.</p>';
+        const cv = s.cv_file
+            ? `<button type="button" class="btn btn--soft btn--sm" data-cv-download="${escapeHtml(s.id)}">Download CV</button>`
+            : '<span class="muted">No CV uploaded.</span>';
+        $('[data-seafarer-ref]').textContent = s.reference || 'Seafarer profile';
+        $('[data-seafarer-title]').textContent = s.name || 'Seafarer';
+        $('[data-seafarer-subtitle]').textContent = `${s.applied_rank || 'Rank not stated'} · ${s.vessel_experience || 'No vessel experience'}`;
+        detail.innerHTML = `
+            <div class="detail-grid">
+                <div class="detail-item"><span>Email</span><strong><a href="mailto:${escapeHtml(s.email || '')}">${escapeHtml(s.email || '—')}</a></strong></div>
+                <div class="detail-item"><span>Phone</span><strong>${escapeHtml(s.phone || '—')}</strong></div>
+                <div class="detail-item"><span>Status</span><strong>${statusBadge(s.status)}</strong></div>
+                <div class="detail-item"><span>Submitted</span><strong>${formatDate(s.created_at)}</strong></div>
+            </div>
+            <div class="detail-block">
+                <h3>Certifications</h3>
+                ${certHtml}
+            </div>
+            <div class="detail-block">
+                <h3>Documents</h3>
+                ${cv}
+            </div>
+            <div class="detail-block">
+                <h3>Screening notes</h3>
+                <p class="muted">${s.notes ? escapeHtml(s.notes) : 'No notes yet.'}</p>
+                ${s.screened_by ? `<p class="muted-small">${escapeHtml(s.screened_by)} · ${formatDate(s.screened_at)}</p>` : ''}
+            </div>
+            <div class="inline-form__actions">
+                <a class="btn btn--ghost btn--sm" href="mailto:${escapeHtml(s.email || '')}">Email candidate</a>
+                <button type="button" class="btn btn--ghost btn--sm" data-modal-close="seafarer-modal">Close</button>
+            </div>`;
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        detail.querySelectorAll('[data-modal-close]').forEach((b) => b.addEventListener('click', closeSeafarerDetail));
+    }
+
+    function closeSeafarerDetail() {
+        const modal = $('#seafarer-modal');
+        if (!modal) return;
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+    }
+
+    /* ------------------------------------------------------------
+       Generic record detail popup for every admin table
+       ------------------------------------------------------------ */
+    function detailItem(label, value, raw = false) {
+        const empty = value == null || value === '';
+        const html = empty ? '—' : (raw ? value : escapeHtml(value));
+        return `<div class="detail-item"><span>${escapeHtml(label)}</span><strong>${html}</strong></div>`;
+    }
+
+    function detailBlock(title, body, raw = false) {
+        if (body == null || body === '') return '';
+        const html = raw
+            ? `<div class="record-article">${sanitizeHtml(body)}</div>`
+            : `<p>${escapeHtml(body)}</p>`;
+        return `<div class="detail-block"><h3>${escapeHtml(title)}</h3>${html}</div>`;
+    }
+
+    function buildRecordDetail(type, record) {
+        const closeBtn = '<button type="button" class="btn btn--ghost btn--sm" data-modal-close="record-modal">Close</button>';
+        const actions = (extra = '') => `<div class="inline-form__actions">${extra}${closeBtn}</div>`;
+
+        if (type === 'jobs') {
+            const vesselName = record.vessel_name
+                ? (/^mv\b/i.test(record.vessel_name) ? record.vessel_name : `MV ${record.vessel_name}`)
+                : '';
+            const vessel = [record.vessel_type, vesselName].filter(Boolean).join(' · ');
+            const salary = record.salary_min == null && record.salary_max == null
+                ? 'Negotiable'
+                : `${record.salary_currency || 'USD'} ${money(record.salary_min, record.salary_max)}`;
+            return {
+                eyebrow: 'Vacancy',
+                title: record.title || 'Vacancy',
+                subtitle: `${record.principal || 'Principal not stated'} · ${record.vessel_type || 'Vessel TBD'}`,
+                body: `
+                    <div class="detail-grid">
+                        ${detailItem('Reference', record.id)}
+                        ${detailItem('Department', record.category || '—')}
+                        ${detailItem('Vessel', vessel || '—')}
+                        ${detailItem('Principal', record.principal)}
+                        ${detailItem('Flag state', record.flag_state)}
+                        ${detailItem('Monthly salary', salary, true)}
+                        ${detailItem('Contract', record.contract_duration)}
+                        ${detailItem('Joining date', formatDate(record.joining_date), true)}
+                        ${detailItem('Status', statusBadge(record.status || 'open'), true)}
+                        ${detailItem('Posted', formatDate(record.posted_at), true)}
+                    </div>
+                    ${detailBlock('Description', record.description)}
+                    ${detailBlock('Requirements', record.requirements)}
+                    ${actions()}`
+            };
+        }
+
+        if (type === 'insights') {
+            return {
+                eyebrow: 'Maritime Insight',
+                title: record.title || 'Article',
+                subtitle: `/${record.slug || ''} · ${record.tag || 'Uncategorised'}`,
+                body: `
+                    <div class="detail-grid">
+                        ${detailItem('Status', statusBadge(record.status || 'draft'), true)}
+                        ${detailItem('Tag', record.tag)}
+                        ${detailItem('Published', formatDate(record.date), true)}
+                        ${detailItem('Read time', record.read)}
+                        ${detailItem('Created', formatDate(record.created_at), true)}
+                    </div>
+                    ${detailBlock('Summary', record.lede)}
+                    ${detailBlock('Article body', record.body, true)}
+                    ${actions(`<a class="btn btn--soft btn--sm" href="../insight.html?slug=${encodeURIComponent(record.slug || '')}" target="_blank" rel="noopener">Open on website</a>`)}`
+            };
+        }
+
+        if (type === 'requests') {
+            return {
+                eyebrow: 'Crew request',
+                title: record.company_name || 'Crew request',
+                subtitle: `${record.reference || record.id || ''} · ${record.vessel_type || 'Vessel TBD'}`,
+                body: `
+                    <div class="detail-grid">
+                        ${detailItem('Reference', record.reference || record.id)}
+                        ${detailItem('Company', record.company_name)}
+                        ${detailItem('Email', `<a href="mailto:${escapeHtml(record.email || '')}">${escapeHtml(record.email || '—')}</a>`, true)}
+                        ${detailItem('Phone', record.phone)}
+                        ${detailItem('Vessel type', record.vessel_type)}
+                        ${detailItem('Flag state', record.flag_state)}
+                        ${detailItem('Contract', record.contract_duration)}
+                        ${detailItem('Target joining', formatDate(record.joining_date), true)}
+                        ${detailItem('Status', statusBadge(record.status || 'new'), true)}
+                        ${detailItem('Submitted', formatDate(record.created_at), true)}
+                    </div>
+                    ${detailBlock('Ranks required', record.required_ranks)}
+                    ${detailBlock('Notes', record.notes)}
+                    ${actions(`<a class="btn btn--soft btn--sm" href="mailto:${escapeHtml(record.email || '')}">Email principal</a>`)}`
+            };
+        }
+
+        if (type === 'contacts') {
+            return {
+                eyebrow: 'Message',
+                title: record.name || 'Message',
+                subtitle: record.email || '',
+                body: `
+                    <div class="detail-grid">
+                        ${detailItem('Email', `<a href="mailto:${escapeHtml(record.email || '')}">${escapeHtml(record.email || '—')}</a>`, true)}
+                        ${detailItem('Status', statusBadge(record.status || 'read'), true)}
+                        ${detailItem('Received', formatDate(record.created_at), true)}
+                        ${detailItem('Notes', record.notes)}
+                    </div>
+                    ${detailBlock('Message', record.message)}
+                    ${actions(`<a class="btn btn--soft btn--sm" href="mailto:${encodeURIComponent(record.email || '')}?subject=${encodeURIComponent('Re: your enquiry with Ardson Maritime')}">Reply</a>`)}`
+            };
+        }
+
+        if (type === 'subscribers') {
+            return {
+                eyebrow: 'Newsletter subscriber',
+                title: record.email || 'Subscriber',
+                subtitle: 'Opted in to vacancy alerts and regulation updates.',
+                body: `
+                    <div class="detail-grid">
+                        ${detailItem('Email', `<a href="mailto:${escapeHtml(record.email || '')}">${escapeHtml(record.email || '—')}</a>`, true)}
+                        ${detailItem('Subscribed', formatDate(record.subscribed_at), true)}
+                    </div>
+                    ${actions(`<a class="btn btn--soft btn--sm" href="mailto:${encodeURIComponent(record.email || '')}">Email subscriber</a>`)}`
+            };
+        }
+
+        if (type === 'users') {
+            return {
+                eyebrow: 'Console user',
+                title: record.name || 'User',
+                subtitle: record.email || '',
+                body: `
+                    <div class="detail-grid">
+                        ${detailItem('Email', `<a href="mailto:${escapeHtml(record.email || '')}">${escapeHtml(record.email || '—')}</a>`, true)}
+                        ${detailItem('Role', roleName(record.role))}
+                        ${detailItem('Status', userStatusBadge(record.status), true)}
+                        ${detailItem('Last sign-in', formatDate(record.last_login), true)}
+                        ${detailItem('Created', formatDate(record.created_at), true)}
+                    </div>
+                    ${actions()}`
+            };
+        }
+
+        if (type === 'backups') {
+            const c = record.counts || {};
+            return {
+                eyebrow: 'Backup snapshot',
+                title: record.filename || record.id || 'Backup',
+                subtitle: record.id || '',
+                body: `
+                    <div class="detail-grid">
+                        ${detailItem('File', record.filename)}
+                        ${detailItem('Backup ID', record.id)}
+                        ${detailItem('Size', record.size_kb != null ? `${record.size_kb} KB` : '—')}
+                        ${detailItem('Created by', record.created_by)}
+                        ${detailItem('Created', formatDate(record.created_at), true)}
+                        ${detailItem('Status', record.status)}
+                    </div>
+                    ${detailBlock('Contents', `${c.jobs ?? 0} vacancies · ${c.seafarers ?? 0} seafarers · ${c.crewRequests ?? 0} crew requests · ${c.contacts ?? 0} messages · ${c.subscribers ?? 0} subscribers · ${c.insights ?? 0} articles`)}
+                    ${actions()}`
+            };
+        }
+
+        if (type === 'logs') {
+            return {
+                eyebrow: `Log · ${record.level || 'info'}`,
+                title: record.action || 'Activity entry',
+                subtitle: record.target || '',
+                body: `
+                    <div class="detail-grid">
+                        ${detailItem('Level', record.level || 'info')}
+                        ${detailItem('Actor', record.actor || 'system')}
+                        ${detailItem('Target', record.target)}
+                        ${detailItem('Time', formatDate(record.created_at), true)}
+                    </div>
+                    ${detailBlock('Detail', record.detail)}
+                    ${actions()}`
+            };
+        }
+
+        return null;
+    }
+
+    function openRecordDetail(type, id) {
+        if (type === 'seafarers') {
+            openSeafarerDetail(id);
+            return;
+        }
+        const list = Array.isArray(state[type]) ? state[type] : [];
+        const record = list.find((row) => String(row.id ?? row.email) === String(id));
+        const modal = $('#record-modal');
+        const body = $('[data-record-body]');
+        if (!record || !modal || !body) return;
+        const detail = buildRecordDetail(type, record);
+        if (!detail) return;
+
+        $('[data-record-eyebrow]').textContent = detail.eyebrow;
+        $('[data-record-title]').textContent = detail.title;
+        $('[data-record-subtitle]').textContent = detail.subtitle || '';
+        body.innerHTML = detail.body;
+        body.querySelectorAll('[data-modal-close]').forEach((b) => b.addEventListener('click', closeRecordDetail));
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        $('.modal__close', modal)?.focus();
+    }
+
+    function closeRecordDetail() {
+        const modal = $('#record-modal');
+        if (!modal) return;
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
+    function rowRecordType(row) {
+        if (row.classList.contains('log-row')) return 'logs';
+        const tbody = row.closest('[data-table]');
+        return tbody ? tbody.dataset.table : '';
+    }
+
+    function initRecordRows() {
+        document.addEventListener('click', (e) => {
+            const row = e.target.closest('[data-row-id]');
+            if (!row) return;
+            if (e.target.closest('button, a, input, select, textarea, label')) return;
+            const type = rowRecordType(row);
+            if (type) openRecordDetail(type, row.dataset.rowId);
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key !== 'Enter' && e.key !== ' ') return;
+            const row = e.target.closest('[data-row-id]');
+            if (!row || e.target !== row) return;
+            const type = rowRecordType(row);
+            if (!type) return;
+            e.preventDefault();
+            openRecordDetail(type, row.dataset.rowId);
+        });
     }
 
     /* ------------------------------------------------------------
@@ -649,29 +1050,87 @@
         renderRequests();
     }
 
+    // `emergency` is set by the public emergency desk, so it must appear in
+    // the editor and filter even though it is not a normal next step.
+    const REQUEST_STATUSES = ['new', 'emergency', 'contacted', 'shortlisting', 'proposed', 'fulfilled', 'closed'];
+
     function renderRequests() {
         const tbody = $('[data-table="requests"]');
         const empty = $('[data-table-empty="requests"]');
         if (!tbody) return;
         const q = state.filters.requests.toLowerCase();
+        const status = state.filters.requestStatus;
         const rows = state.requests.filter((r) => {
+            if (status && r.status !== status) return false;
             if (!q) return true;
-            const hay = `${r.company_name} ${r.email} ${r.vessel_type} ${r.required_ranks}`.toLowerCase();
+            const hay = `${r.company_name} ${r.email} ${r.vessel_type} ${r.required_ranks} ${r.flag_state || ''}`.toLowerCase();
             return hay.includes(q);
         });
-        tbody.innerHTML = rows.map((r) => `
-            <tr>
+        tbody.innerHTML = rows.map((r) => {
+            const statusOptions = REQUEST_STATUSES.map((st) =>
+                `<option value="${st}"${st === r.status ? ' selected' : ''}>${st[0].toUpperCase() + st.slice(1)}</option>`).join('');
+            return `
+            <tr data-row-id="${escapeHtml(r.id)}" tabindex="0">
                 <td><strong>${escapeHtml(r.reference || '—')}</strong></td>
                 <td>
                     <strong>${escapeHtml(r.company_name)}</strong>
                     <span class="sub">${escapeHtml(r.email)}</span>
                 </td>
-                <td>${escapeHtml(r.vessel_type)}</td>
-                <td style="max-width:280px">${escapeHtml(r.required_ranks)}</td>
+                <td>
+                    <strong>${escapeHtml(r.vessel_type || '—')}</strong>
+                    <span class="sub">${escapeHtml(r.contract_duration || 'Contract TBD')}</span>
+                </td>
+                <td><div class="cell-note">${escapeHtml(r.required_ranks)}</div></td>
                 <td>${formatDate(r.joining_date)}</td>
-                <td>${formatDate(r.created_at)}</td>
-            </tr>`).join('');
+                <td>
+                    <select class="status-select status-select--${escapeHtml(r.status || 'new')}" data-request-status-select="${escapeHtml(r.id)}" aria-label="Change crew request status">
+                        ${statusOptions}
+                    </select>
+                </td>
+                <td>
+                    <div class="cell-actions">
+                        <button type="button" class="btn btn--soft btn--sm" data-request-to-job="${escapeHtml(r.id)}">Create vacancy</button>
+                        <a class="btn btn--ghost btn--sm" href="mailto:${escapeHtml(r.email || '')}">Email</a>
+                    </div>
+                </td>
+            </tr>`;
+        }).join('');
         if (empty) empty.hidden = rows.length > 0;
+
+        $$('[data-request-status-select]', tbody).forEach((sel) => sel.addEventListener('change', async () => {
+            sel.disabled = true;
+            const { ok, data } = await api(`/crew-requests/${encodeURIComponent(sel.dataset.requestStatusSelect)}`, {
+                method: 'PATCH',
+                body: { status: sel.value }
+            });
+            if (ok) {
+                showToast(`Crew request moved to ${sel.value}.`, 'success');
+                await loadRequests();
+                await loadDashboard();
+            } else {
+                showToast(data?.message || 'Could not update the crew request.', 'error');
+                sel.disabled = false;
+            }
+        }));
+        $$('[data-request-to-job]', tbody).forEach((b) => b.addEventListener('click', () => {
+            const r = state.requests.find((row) => String(row.id) === String(b.dataset.requestToJob));
+            if (r) openJobEditorFromRequest(r);
+        }));
+    }
+
+    function openJobEditorFromRequest(r) {
+        openJobEditor(null);
+        const form = $('#job-form');
+        if (!form) return;
+        $('#job-principal').value = r.company_name || '';
+        const vesselMap = { container: 'Container', tanker: 'Tanker', bulk: 'Bulk', gas: 'LNG', lng: 'LNG', offshore: 'Offshore', cruise: 'Cruise' };
+        const type = String(r.vessel_type || '').toLowerCase();
+        const match = Object.keys(vesselMap).find((key) => type.includes(key));
+        if (match) $('#job-vessel-type').value = vesselMap[match];
+        $('#job-flag').value = r.flag_state === 'TBD' ? '' : (r.flag_state || '');
+        $('#job-duration').value = r.contract_duration && r.contract_duration !== 'TBD' ? r.contract_duration : '';
+        $('#job-joining').value = (r.joining_date || '').slice(0, 10);
+        showToast('Vacancy editor pre-filled from the crew request.', 'info', 2600);
     }
 
     /* ------------------------------------------------------------
@@ -688,24 +1147,46 @@
         const tbody = $('[data-table="contacts"]');
         const empty = $('[data-table-empty="contacts"]');
         if (!tbody) return;
-        tbody.innerHTML = state.contacts.map((c) => `
-            <tr>
-                <td><strong>${escapeHtml(c.name)}</strong></td>
-                <td>${escapeHtml(c.email)}</td>
-                <td style="max-width:340px">${escapeHtml(c.message)}</td>
+        const filter = state.filters.messageStatus || 'all';
+        const rows = state.contacts.filter((c) => filter === 'all' || c.status === filter);
+        tbody.innerHTML = rows.map((c) => {
+            const replyHref = `mailto:${encodeURIComponent(c.email || '')}?subject=${encodeURIComponent('Re: your enquiry with Ardson Maritime')}`;
+            return `
+            <tr class="message-row${c.status === 'unread' ? ' message-row--unread' : ''}" data-row-id="${escapeHtml(c.id)}" tabindex="0">
+                <td>
+                    <strong>${escapeHtml(c.name)}</strong>
+                    <span class="sub">${escapeHtml(c.email)}</span>
+                </td>
+                <td><div class="cell-note">${escapeHtml(c.message)}</div></td>
                 <td>${formatDate(c.created_at)}</td>
                 <td>
+                    <select class="status-select status-select--${escapeHtml(c.status || 'read')}" data-message-status="${escapeHtml(c.id)}" aria-label="Change message status">
+                        ${['unread', 'read', 'replied', 'archived'].map((st) => `<option value="${st}"${st === c.status ? ' selected' : ''}>${st[0].toUpperCase() + st.slice(1)}</option>`).join('')}
+                    </select>
+                </td>
+                <td>
                     <div class="cell-actions">
-                        ${statusBadge(c.status)}
-                        ${c.status !== 'read' ? `<button type="button" class="btn btn--soft btn--sm" data-read-msg="${escapeHtml(c.id)}">Mark read</button>` : ''}
+                        <a class="btn btn--soft btn--sm" href="${replyHref}">Reply</a>
                     </div>
                 </td>
-            </tr>`).join('');
-        if (empty) empty.hidden = state.contacts.length > 0;
-        $$('[data-read-msg]', tbody).forEach((b) => b.addEventListener('click', async () => {
-            const { ok, data } = await api(`/contacts/${encodeURIComponent(b.dataset.readMsg)}/read`, { method: 'PATCH' });
-            if (ok) { await loadContacts(); await loadDashboard(); }
-            else showToast(data?.message || 'Could not update the message.', 'error');
+            </tr>`;
+        }).join('');
+        if (empty) empty.hidden = rows.length > 0;
+
+        $$('[data-message-status]', tbody).forEach((sel) => sel.addEventListener('change', async () => {
+            sel.disabled = true;
+            const { ok, data } = await api(`/contacts/${encodeURIComponent(sel.dataset.messageStatus)}`, {
+                method: 'PATCH',
+                body: { status: sel.value }
+            });
+            if (ok) {
+                showToast(`Message marked as ${sel.value}.`, 'success', 2400);
+                await loadContacts();
+                await loadDashboard();
+            } else {
+                showToast(data?.message || 'Could not update the message.', 'error');
+                sel.disabled = false;
+            }
         }));
     }
 
@@ -724,11 +1205,20 @@
         const empty = $('[data-table-empty="subscribers"]');
         if (!tbody) return;
         tbody.innerHTML = state.subscribers.map((s) => `
-            <tr>
+            <tr data-row-id="${escapeHtml(s.email)}" tabindex="0">
                 <td><strong>${escapeHtml(s.email)}</strong></td>
+                <td>${formatDate(s.subscribed_at)}</td>
                 <td><div class="cell-actions"><a href="mailto:${encodeURIComponent(s.email)}" class="btn btn--soft btn--sm">Email</a></div></td>
             </tr>`).join('');
         if (empty) empty.hidden = state.subscribers.length > 0;
+
+        const countEl = $('[data-subscriber-count]');
+        if (countEl) countEl.textContent = String(state.subscribers.length);
+        const latestEl = $('[data-subscriber-latest]');
+        if (latestEl) {
+            const dates = state.subscribers.map((s) => s.subscribed_at).filter(Boolean).sort();
+            latestEl.textContent = dates.length ? formatDate(dates[dates.length - 1]) : '—';
+        }
     }
 
     /* ------------------------------------------------------------
@@ -753,9 +1243,8 @@
         state.settings = data.data;
         fillSettingsForm('site', data.data.site);
         fillSettingsForm('hero', data.data.hero);
-        fillSettingsForm('help', data.data.help);
-        fillSettingsForm('profile_button', data.data.profile_button);
-        fillSettingsForm('help_button', data.data.help_button);
+        initPageEditor();
+        initBlocksEditor();
         await loadHeroSlides();
     }
 
@@ -781,9 +1270,6 @@
             el.value = value == null ? '' : String(value);
         });
     }
-
-    /** Select fields that hold 0/1 flags rather than free text. */
-    const FLAG_SELECTS = new Set(['autoplay', 'pause_on_hover', 'show_dots', 'show_arrows', 'enabled']);
 
     function collectSettingsForm(section) {
         const form = $(`[data-settings-form="${section}"]`);
@@ -818,10 +1304,18 @@
         btn.disabled = true;
         btn.textContent = 'Saving…';
 
-        const { ok, data } = await api(`/settings/${section}`, { method: 'PATCH', body: collectSettingsForm(section) });
+        const body = section === 'pages'
+            ? { [($('[data-page-select]') || {}).value]: collectPagePayload() }
+            : section === 'blocks'
+                ? collectBlockPayload()
+                : collectSettingsForm(section);
+
+        const { ok, data } = await api(`/settings/${section}`, { method: 'PATCH', body });
         if (ok) {
             state.settings = data.data;
             showToast(data.message || 'Settings saved.', 'success');
+            if (section === 'pages') pageStatus('Custom override active.');
+            if (section === 'blocks') renderBlockEditor();
             await loadDashboard();
         } else {
             showToast(data?.message || 'Could not save settings.', 'error');
@@ -837,9 +1331,6 @@
             state.settings = data.data;
             fillSettingsForm('site', data.data.site);
             fillSettingsForm('hero', data.data.hero);
-            fillSettingsForm('help', data.data.help);
-            fillSettingsForm('profile_button', data.data.profile_button);
-            fillSettingsForm('help_button', data.data.help_button);
             await loadHeroSlides();
             showToast('Defaults restored.', 'success');
         } else {
@@ -847,12 +1338,305 @@
         }
     }
 
+    /* ------------------------------------------------------------
+       Settings → Pages
+       ------------------------------------------------------------ */
+
+    const PAGE_EDITOR_PAGES = [
+        { slug: 'index', label: 'Home (meta only)' },
+        { slug: 'jobs', label: 'Open vacancies' },
+        { slug: 'seafarers', label: 'For seafarers' },
+        { slug: 'principals', label: 'For principals' },
+        { slug: 'emergency', label: 'Emergency replacement' },
+        { slug: 'training', label: 'Training' },
+        { slug: 'insights', label: 'Maritime Insight' },
+        { slug: 'about', label: 'About' },
+        { slug: 'contact', label: 'Contact' },
+        { slug: 'privacy', label: 'Privacy policy', legal: true },
+        { slug: 'terms', label: 'Terms of service', legal: true },
+        { slug: 'mlc-compliance', label: 'MLC compliance', legal: true }
+    ];
+
+    let pageEditorReady = false;
+
+    function initPageEditor() {
+        const select = $('[data-page-select]');
+        if (!select) return;
+        select.innerHTML = PAGE_EDITOR_PAGES
+            .map((page) => `<option value="${page.slug}">${escapeHtml(page.label)}</option>`)
+            .join('');
+        if (pageEditorReady) return;
+        pageEditorReady = true;
+        select.addEventListener('change', () => loadPageEditor());
+        $$('[data-page-load]').forEach((btn) => btn.addEventListener('click', () => seedPageEditor(select.value, true)));
+        const clear = $('[data-page-clear]');
+        if (clear) clear.addEventListener('click', clearPageOverride);
+        loadPageEditor();
+    }
+
+    function pageStatus(text) {
+        const el = $('[data-page-status]');
+        if (el) el.textContent = text;
+    }
+
+    function fillPageFields(values) {
+        $$('[data-page-field]').forEach((el) => {
+            const value = values[el.dataset.pageField];
+            el.value = value == null ? '' : String(value);
+        });
+    }
+
+    function collectPagePayload() {
+        const payload = {};
+        $$('[data-page-field]').forEach((el) => {
+            const value = el.value;
+            payload[el.dataset.pageField] = el.dataset.pageField === 'body' ? value.trim() : value.trim();
+        });
+        return payload;
+    }
+
+    function loadPageEditor() {
+        const select = $('[data-page-select]');
+        if (!select) return;
+        const slug = select.value;
+        const saved = state.settings?.pages?.[slug];
+        const meta = PAGE_EDITOR_PAGES.find((page) => page.slug === slug);
+        const isHome = slug === 'index';
+        ['eyebrow', 'heading', 'lede'].forEach((name) => {
+            const field = $(`[data-page-field="${name}"]`);
+            if (field && field.closest('.field')) field.closest('.field').hidden = isHome;
+        });
+        const bodyField = $('[data-page-field="body"]');
+        if (bodyField && bodyField.closest('.field')) bodyField.closest('.field').hidden = !meta?.legal;
+        if (saved) {
+            fillPageFields(saved);
+            pageStatus('Custom override active.');
+            return;
+        }
+        fillPageFields({});
+        pageStatus('No override saved — loading the live page copy…');
+        seedPageEditor(slug, false);
+    }
+
+    async function seedPageEditor(slug, announce) {
+        try {
+            const res = await fetch(`../${slug}.html`, { cache: 'no-store' });
+            if (!res.ok) throw new Error('not found');
+            const html = await res.text();
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const hero = doc.querySelector('.page-hero');
+            const lede = hero && (hero.querySelector('.lede') || hero.querySelector('.hero__lede'));
+            const values = {
+                title: (doc.querySelector('title')?.textContent || '').trim(),
+                description: doc.querySelector('meta[name="description"]')?.getAttribute('content') || '',
+                eyebrow: hero?.querySelector('.eyebrow')?.textContent.trim() || '',
+                heading: hero?.querySelector('h1')?.textContent.trim() || '',
+                lede: lede ? lede.textContent.replace(/\s+/g, ' ').trim() : '',
+                body: doc.querySelector('[data-legal-body]')?.innerHTML.trim() || ''
+            };
+            const select = $('[data-page-select]');
+            if (!select || select.value !== slug) return;
+            if (state.settings?.pages?.[slug]) return;
+            fillPageFields(values);
+            pageStatus(announce ? 'Loaded live page copy. Save to override it.' : 'No override saved. Fields show the live page copy.');
+        } catch (_err) {
+            pageStatus('No override saved. Could not read the live page; fill in the fields you need.');
+        }
+    }
+
+    async function clearPageOverride() {
+        const select = $('[data-page-select]');
+        if (!select) return;
+        const slug = select.value;
+        if (!window.confirm('Remove the saved override and show the built-in page copy again?')) return;
+        const { ok, data } = await api('/settings/pages', { method: 'PATCH', body: { [slug]: null } });
+        if (!ok) return showToast(data?.message || 'Could not clear the override.', 'error');
+        state.settings = data.data;
+        showToast('Override cleared.', 'success');
+        await loadPageEditor();
+    }
+
+    /* ------------------------------------------------------------
+       Settings → Content blocks
+       ------------------------------------------------------------ */
+
+    const BLOCK_SCHEMA = {
+        audience: {
+            fields: [['eyebrow', 'Eyebrow'], ['title', 'Title'], ['lede', 'Intro', 'textarea']],
+            itemLabel: 'Audience card',
+            items: [
+                ['key', 'Anchor ID (seafarers / principals)'],
+                ['tag', 'Tag'],
+                ['title', 'Title'],
+                ['text', 'Text', 'textarea'],
+                ['image', 'Image URL'],
+                ['bullets', 'Bullets — one per line', 'lines'],
+                ['primary_label', 'Primary button label'],
+                ['secondary_label', 'Secondary link label'],
+                ['secondary_href', 'Secondary link URL']
+            ]
+        },
+        trust: {
+            fields: [['eyebrow', 'Eyebrow'], ['title', 'Title']],
+            itemLabel: 'Trust point',
+            items: [['title', 'Title'], ['text', 'Text', 'textarea']]
+        },
+        training: {
+            fields: [
+                ['eyebrow', 'Eyebrow'], ['title', 'Title'], ['lede', 'Intro', 'textarea'],
+                ['link_label', 'Header link label'], ['link_href', 'Header link URL']
+            ],
+            itemLabel: 'Programme',
+            items: [
+                ['num', 'Number'], ['title', 'Title'], ['text', 'Text', 'textarea'],
+                ['link_label', 'Link label'], ['link_href', 'Link URL']
+            ]
+        },
+        faq: {
+            fields: [['eyebrow', 'Eyebrow'], ['title', 'Title']],
+            itemLabel: 'Question',
+            items: [['title', 'Question'], ['text', 'Answer', 'textarea']]
+        },
+        stepsSeafarers: {
+            fields: [['eyebrow', 'Eyebrow'], ['title', 'Title'], ['lede', 'Intro', 'textarea']],
+            itemLabel: 'Step',
+            items: [['title', 'Title'], ['text', 'Text', 'textarea']]
+        },
+        stepsPrincipals: {
+            fields: [['eyebrow', 'Eyebrow'], ['title', 'Title'], ['lede', 'Intro', 'textarea']],
+            itemLabel: 'Step',
+            items: [['title', 'Title'], ['text', 'Text', 'textarea']]
+        },
+        stepsEmergency: {
+            fields: [['eyebrow', 'Eyebrow'], ['title', 'Title'], ['lede', 'Intro', 'textarea']],
+            itemLabel: 'Step',
+            items: [['title', 'Title'], ['text', 'Text', 'textarea']]
+        }
+    };
+
+    let blocksEditorReady = false;
+
+    function blockField(name, label, value, type) {
+        const wide = type === 'textarea' || type === 'lines';
+        const style = wide ? ' style="grid-column:1/-1"' : '';
+        if (wide) {
+            const text = type === 'lines'
+                ? (Array.isArray(value) ? value.join('\n') : (value || ''))
+                : (value || '');
+            return `<div class="field"${style}><label>${escapeHtml(label)}</label>
+                <textarea rows="${type === 'lines' ? 4 : 3}" data-block-field="${name}" data-block-type="${type}">${escapeHtml(text)}</textarea></div>`;
+        }
+        return `<div class="field"${style}><label>${escapeHtml(label)}</label>
+            <input data-block-field="${name}" value="${escapeHtml(value == null ? '' : value)}"></div>`;
+    }
+
+    function blockItemHtml(schema, item) {
+        item = item || {};
+        return `<div class="panel" style="margin-top:1rem" data-block-item>
+            <div class="panel__head">
+                <div><h3>${escapeHtml(schema.itemLabel)}</h3></div>
+                <button type="button" class="btn btn--ghost btn--sm" data-block-remove>Remove</button>
+            </div>
+            <div class="panel__body">
+                <div class="form-grid form-grid--2">
+                    ${schema.items.map(([name, label, type]) => blockField(name, label, item[name], type)).join('')}
+                </div>
+            </div>
+        </div>`;
+    }
+
+    function renderBlockEditor() {
+        const select = $('[data-block-select]');
+        const root = $('[data-block-editor]');
+        if (!select || !root) return;
+        const key = select.value;
+        const schema = BLOCK_SCHEMA[key];
+        if (!schema) return;
+        const data = state.settings?.blocks?.[key] || {};
+        const items = Array.isArray(data.items) ? data.items : [];
+        root.innerHTML = `
+            <div class="form-grid form-grid--2" data-block-head>
+                ${schema.fields.map(([name, label, type]) => blockField(name, label, data[name], type)).join('')}
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:1.5rem">
+                <h3>${escapeHtml(schema.itemLabel)}s</h3>
+                <button type="button" class="btn btn--ghost btn--sm" data-block-add>Add ${escapeHtml(schema.itemLabel.toLowerCase())}</button>
+            </div>
+            <div data-block-items>
+                ${items.map((item) => blockItemHtml(schema, item)).join('')}
+            </div>
+            <div class="table-empty" data-block-empty ${items.length ? 'hidden' : ''}>No entries yet. Add one above.</div>`;
+    }
+
+    function collectBlockPayload() {
+        const select = $('[data-block-select]');
+        const root = $('[data-block-editor]');
+        const schema = BLOCK_SCHEMA[select?.value];
+        if (!schema || !root) return {};
+        const block = {};
+        $$('[data-block-head] [data-block-field]').forEach((el) => {
+            block[el.dataset.blockField] = el.value.trim();
+        });
+        block.items = $$('[data-block-item]', root).map((item) => {
+            const row = {};
+            $$('[data-block-field]', item).forEach((el) => {
+                row[el.dataset.blockField] = el.dataset.blockType === 'lines'
+                    ? el.value.split('\n').map((line) => line.trim()).filter(Boolean)
+                    : el.value.trim();
+            });
+            return row;
+        });
+        return { [select.value]: block };
+    }
+
+    function initBlocksEditor() {
+        const select = $('[data-block-select]');
+        const root = $('[data-block-editor]');
+        if (!select || !root) return;
+        if (!blocksEditorReady) {
+            blocksEditorReady = true;
+            select.addEventListener('change', renderBlockEditor);
+            root.addEventListener('click', (ev) => {
+                const add = ev.target.closest('[data-block-add]');
+                if (add) {
+                    const schema = BLOCK_SCHEMA[select.value];
+                    const holder = $('[data-block-items]', root);
+                    const empty = $('[data-block-empty]', root);
+                    if (holder) holder.insertAdjacentHTML('beforeend', blockItemHtml(schema, {}));
+                    if (empty) empty.hidden = true;
+                    return;
+                }
+                const remove = ev.target.closest('[data-block-remove]');
+                if (remove) {
+                    const card = remove.closest('[data-block-item]');
+                    if (card) card.remove();
+                    const empty = $('[data-block-empty]', root);
+                    if (empty) empty.hidden = $$('[data-block-item]', root).length > 0;
+                }
+            });
+            const reset = $('[data-block-reset]');
+            if (reset) reset.addEventListener('click', resetBlockSection);
+        }
+        renderBlockEditor();
+    }
+
+    async function resetBlockSection() {
+        const select = $('[data-block-select]');
+        if (!select) return;
+        if (!window.confirm('Restore the default content for this section?')) return;
+        const { ok, data } = await api(`/settings/blocks/${select.value}/reset`, { method: 'POST' });
+        if (!ok) return showToast(data?.message || 'Could not reset this section.', 'error');
+        state.settings = data.data;
+        renderBlockEditor();
+        showToast('Section restored.', 'success');
+    }
+
     /** Which settings forms belong to each tab. */
     const SETTINGS_TAB_FORMS = {
         site: ['site'],
         hero: ['hero'],
-        help: ['help'],
-        buttons: ['profile_button', 'help_button']
+        pages: ['pages'],
+        blocks: ['blocks']
     };
 
     function initSettingsTabs() {
@@ -915,7 +1699,7 @@
                     </div>
                     <div class="cell-actions">
                         <button type="button" class="btn btn--soft btn--sm" data-edit-slide="${escapeHtml(slide.id)}">Edit</button>
-                        <button type="button" class="btn btn--ghost btn--sm" data-delete-slide="${escapeHtml(slide.id)}" style="color:var(--danger)">Delete</button>
+                        <button type="button" class="btn btn--ghost btn--danger btn--sm" data-delete-slide="${escapeHtml(slide.id)}">Delete</button>
                     </div>
                 </div>`;
         }).join('');
@@ -1224,7 +2008,7 @@
         const empty = $('[data-table-empty="users"]');
         if (!tbody) return;
         tbody.innerHTML = state.users.map((u) => `
-            <tr>
+            <tr data-row-id="${escapeHtml(u.id)}" tabindex="0">
                 <td>
                     <strong>${escapeHtml(u.name)}</strong>
                     <span class="sub">${escapeHtml(u.email)}</span>
@@ -1235,7 +2019,7 @@
                 <td>
                     <div class="cell-actions">
                         <button type="button" class="btn btn--soft btn--sm" data-edit-user="${escapeHtml(u.id)}">Edit</button>
-                        <button type="button" class="btn btn--ghost btn--sm" data-delete-user="${escapeHtml(u.id)}" style="color:var(--danger)">Remove</button>
+                        <button type="button" class="btn btn--ghost btn--danger btn--sm" data-delete-user="${escapeHtml(u.id)}">Remove</button>
                     </div>
                 </td>
             </tr>`).join('');
@@ -1346,7 +2130,7 @@
                     </div>
                     <div class="role-card__actions">
                         <button type="button" class="btn btn--soft btn--sm" data-edit-role="${escapeHtml(role.id)}"${role.locked ? ' disabled' : ''}>Edit</button>
-                        <button type="button" class="btn btn--ghost btn--sm" data-delete-role="${escapeHtml(role.id)}" style="color:var(--danger)"${role.locked ? ' disabled' : ''}>Delete</button>
+                        <button type="button" class="btn btn--ghost btn--danger btn--sm" data-delete-role="${escapeHtml(role.id)}"${role.locked ? ' disabled' : ''}>Delete</button>
                     </div>
                 </article>`;
         }).join('');
@@ -1448,7 +2232,7 @@
         tbody.innerHTML = state.backups.map((b) => {
             const c = b.counts || {};
             return `
-            <tr>
+            <tr data-row-id="${escapeHtml(b.id)}" tabindex="0">
                 <td>
                     <strong>${escapeHtml(b.filename)}</strong>
                     <span class="sub">${escapeHtml(b.id)}</span>
@@ -1463,7 +2247,7 @@
                 <td>
                     <div class="cell-actions">
                         <button type="button" class="btn btn--soft btn--sm" data-restore-backup="${escapeHtml(b.id)}">Restore</button>
-                        <button type="button" class="btn btn--ghost btn--sm" data-delete-backup="${escapeHtml(b.id)}" style="color:var(--danger)">Delete</button>
+                        <button type="button" class="btn btn--ghost btn--danger btn--sm" data-delete-backup="${escapeHtml(b.id)}">Delete</button>
                     </div>
                 </td>
             </tr>`;
@@ -1530,19 +2314,32 @@
         Object.entries(counts).forEach(([key, value]) => {
             const el = $(`[data-log-count="${key}"]`);
             if (el) el.textContent = String(value ?? 0);
+            const card = $(`[data-log-summary="${key}"]`);
+            if (card) card.textContent = String(value ?? 0);
         });
 
-        list.innerHTML = state.logs.map((log) => `
-            <div class="log-row">
-                <span class="log-row__level log-row__level--${escapeHtml(log.level)}">${escapeHtml(log.level)}</span>
+        list.innerHTML = state.logs.map((log) => {
+            const level = String(log.level || 'info').toLowerCase();
+            const icon = level === 'error'
+                ? '<circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 9l-6 6M9 9l6 6"/>'
+                : level === 'warning'
+                    ? '<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M12 3l9 16H3l9-16z"/>'
+                    : '<circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l2.5 2.5"/>';
+            return `
+            <div class="log-row log-row--${escapeHtml(level)}" data-row-id="${escapeHtml(log.id || '')}" tabindex="0">
+                <span class="log-row__level log-row__level--${escapeHtml(level)}">
+                    <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24" aria-hidden="true">${icon}</svg>
+                </span>
                 <div class="log-row__body">
                     <strong>${escapeHtml(log.action)}${log.target ? ' · ' + escapeHtml(log.target) : ''}</strong>
-                    <span>${escapeHtml(log.detail || '—')}</span>
+                    <span>${escapeHtml(log.detail || 'No additional detail')}</span>
                 </div>
                 <div class="log-row__meta">
-                    ${escapeHtml(log.actor)}<br>${formatDate(log.created_at)}
+                    <span class="log-row__actor">${escapeHtml(log.actor || 'system')}</span>
+                    <time>${formatDate(log.created_at)}</time>
                 </div>
-            </div>`).join('');
+            </div>`;
+        }).join('');
         if (empty) empty.hidden = state.logs.length > 0;
     }
 
@@ -1582,6 +2379,8 @@
                 const id = btn.dataset.modalClose;
                 if (id === 'insight-modal') closeInsightEditor();
                 else if (id === 'slide-modal') closeSlideEditor();
+                else if (id === 'seafarer-modal') closeSeafarerDetail();
+                else if (id === 'record-modal') closeRecordDetail();
                 else closeJobEditor();
             });
         });
@@ -1599,6 +2398,16 @@
         if (slideModal) {
             slideModal.addEventListener('mousedown', (e) => { if (e.target === slideModal) closeSlideEditor(); });
             slideModal.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSlideEditor(); });
+        }
+        const seafarerModal = $('#seafarer-modal');
+        if (seafarerModal) {
+            seafarerModal.addEventListener('mousedown', (e) => { if (e.target === seafarerModal) closeSeafarerDetail(); });
+            seafarerModal.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSeafarerDetail(); });
+        }
+        const recordModal = $('#record-modal');
+        if (recordModal) {
+            recordModal.addEventListener('mousedown', (e) => { if (e.target === recordModal) closeRecordDetail(); });
+            recordModal.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeRecordDetail(); });
         }
         $$('[data-admin-new-job]').forEach((b) => b.addEventListener('click', () => openJobEditor(null)));
         const form = $('#job-form');
@@ -1641,9 +2450,29 @@
         });
         $$('[data-filter-select]').forEach((select) => {
             select.addEventListener('change', () => {
-                state.filters[select.dataset.filterSelect] = select.value;
-                if (select.dataset.filterSelect === 'insight-status') renderInsights();
+                const key = select.dataset.filterSelect;
+                state.filters[key] = select.value;
+                if (key === 'insight-status') renderInsights();
+                else if (key === 'seafarer-status') renderSeafarers();
+                else if (key === 'request-status') renderRequests();
                 else renderJobs();
+            });
+        });
+        $$('[data-message-filter]').forEach((tab) => {
+            tab.addEventListener('click', () => {
+                state.filters.messageStatus = tab.dataset.messageFilter;
+                $$('[data-message-filter]').forEach((t) => {
+                    const on = t === tab;
+                    t.classList.toggle('is-active', on);
+                    t.setAttribute('aria-selected', String(on));
+                });
+                renderContacts();
+            });
+        });
+        $$('[data-view-link]').forEach((link) => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                switchView(link.dataset.viewLink);
             });
         });
     }
@@ -1662,8 +2491,15 @@
             window.location.replace(CFG.login || 'login.html');
         }));
         $$('[data-admin-export]').forEach((b) => b.addEventListener('click', () => {
+            // Prefix formula starters so a subscriber email cannot execute
+            // as a spreadsheet formula when the CSV is opened in Excel.
+            const csvCell = (value) => {
+                let text = String(value == null ? '' : value);
+                if (/^[=+\-@\t\r]/.test(text)) text = "'" + text;
+                return '"' + text.replace(/"/g, '""') + '"';
+            };
             const rows = [['Email']].concat(state.subscribers.map((s) => [s.email]));
-            const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+            const csv = rows.map((r) => r.map(csvCell).join(',')).join('\n');
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -1687,6 +2523,32 @@
                 e.preventDefault();
                 switchView(link.dataset.view);
             });
+        });
+    }
+
+    function initSidebarMenu() {
+        const sidebar = $('.admin-sidebar');
+        const toggle = $('[data-admin-menu]');
+        if (!sidebar || !toggle) return;
+        const setOpen = (open) => {
+            sidebar.classList.toggle('is-open', open);
+            toggle.setAttribute('aria-expanded', String(open));
+            toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+        };
+        toggle.addEventListener('click', () => setOpen(!sidebar.classList.contains('is-open')));
+        $$('[data-view]', sidebar).forEach((link) => link.addEventListener('click', () => setOpen(false)));
+        document.addEventListener('click', (e) => {
+            if (sidebar.classList.contains('is-open') && !sidebar.contains(e.target)) setOpen(false);
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && sidebar.classList.contains('is-open')) {
+                setOpen(false);
+                toggle.focus();
+            }
+        });
+        const desktop = window.matchMedia('(min-width: 961px)');
+        desktop.addEventListener('change', (e) => {
+            if (e.matches) setOpen(false);
         });
     }
 
@@ -1727,10 +2589,17 @@
         if ($('#admin-login-form')) { initLogin(); return; }
         const userEl = $('[data-admin-user]');
         if (userEl) userEl.textContent = 'Signed in · ' + (sessionStorage.getItem('ardson_admin_user') || 'Admin');
+        startClock();
         initNav();
+        initSidebarMenu();
         initModals();
+        initRecordRows();
         initFilters();
         initTopbar();
+        document.addEventListener('click', (event) => {
+            const trigger = event.target.closest('[data-cv-download]');
+            if (trigger) downloadCv(trigger.dataset.cvDownload);
+        });
         switchView(currentView());
     }
 

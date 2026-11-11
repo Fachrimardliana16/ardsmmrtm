@@ -12,8 +12,9 @@
 async function sendEmail(subject, lines) {
     const host = process.env.SMTP_HOST;
     if (!host) {
-        console.log('[notifier:email] (dry run) ' + subject);
-        lines.forEach((line) => console.log('    ' + line));
+        // Do not dump names, emails, or phone numbers into server logs.
+        console.log('[notifier:email] (dry run) ' + subject + ' · ' + lines.length + ' fields');
+        if (process.env.NOTIFIER_DEBUG === 'true') lines.forEach((line) => console.log('    ' + line));
         return { delivered: false, channel: 'email', reason: 'SMTP not configured' };
     }
 

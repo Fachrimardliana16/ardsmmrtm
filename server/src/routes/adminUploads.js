@@ -62,7 +62,7 @@ router.post('/hero', heroUpload.single('file'), async (req, res) => {
         console.error('[media] failed:', err.message);
         return res.status(500).json({
             ok: false,
-            message: err.message || 'Could not process the upload.'
+            message: 'Could not process that file. Try a different image or video.'
         });
     }
 });

@@ -8,7 +8,7 @@ Disallow: /_partials/
 Disallow: /scripts/
 Disallow: /server/
 Disallow: /api/
+Disallow: /uploads/cv/
 Disallow: /pages.json
-Disallow: /*?token=
 
 Sitemap: https://www.ardsonmaritime.com/sitemap.xml

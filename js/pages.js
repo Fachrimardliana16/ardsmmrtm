@@ -25,6 +25,11 @@
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
 
+    /** Article bodies are rich text; run them through the shared allowlist. */
+    const sanitizeHtml = (html) => (
+        window.ArdsonSanitize ? window.ArdsonSanitize.html(html) : escapeHtml(html)
+    );
+
     const money = (n, c = 'USD') => c + ' ' + Number(n).toLocaleString('en-US');
 
     /** Vessel names arrive bare ("Horizon") or prefixed ("MV Horizon"). */
@@ -79,10 +84,12 @@
         if (!id) { renderJobMissing(root); return; }
 
         let job = null;
+        let apiReached = false;
         try {
             const res = await fetch(API_BASE + '/jobs/' + encodeURIComponent(id), {
                 signal: AbortSignal.timeout(8000)
             });
+            apiReached = true;
             if (res.ok) {
                 const payload = await res.json();
                 job = (payload && payload.data) || null;
@@ -91,13 +98,16 @@
             /* network failure — fall through to the seed list */
         }
 
-        if (!job) {
+        // A deleted vacancy must stay deleted. Only fall back to the local
+        // seed list when the API could not be reached at all.
+        if (!job && !apiReached) {
             job = SEED_JOBS.find((j) => j.id === id) || null;
         }
 
         if (!job) { renderJobMissing(root); return; }
         renderJob(root, job);
         document.title = job.title + ' — Ardson Maritime Career Center';
+        applyJobSeo(job);
         const crumb = document.querySelector('.crumb [data-crumb-title]');
         if (crumb) crumb.textContent = job.title;
         const h1 = document.querySelector('.page-hero h1');
@@ -108,8 +118,87 @@
             : lede.textContent;
     }
 
+    /**
+     * Per-vacancy metadata and JobPosting structured data. Vacancy pages
+     * share one HTML file, so the canonical URL carries the id and the
+     * JobPosting block is injected after the vacancy is fetched.
+     */
+    function applyJobSeo(job) {
+        const base = 'https://www.ardsonmaritime.com';
+        const url = base + '/job?id=' + encodeURIComponent(job.id);
+        const description = job.principal
+            ? `Apply as ${job.title} with ${job.principal}. ${job.vessel_type} vessel, ${job.flag_state || 'international'} flag, ${job.contract_duration || 'standard contract'}. Free for seafarers under MLC 2006.`
+            : `Open maritime vacancy for ${job.title}. Apply free through Ardson Maritime Career Center.`;
+
+        const setMeta = (selector, value) => {
+            const el = document.querySelector(selector);
+            if (el) el.setAttribute('content', value);
+        };
+        const canonical = document.querySelector('link[rel="canonical"]');
+        if (canonical) canonical.setAttribute('href', url);
+        setMeta('meta[name="description"]', description);
+        setMeta('meta[property="og:title"]', job.title + ' — Ardson Maritime Career Center');
+        setMeta('meta[property="og:description"]', description);
+        setMeta('meta[property="og:url"]', url);
+        setMeta('meta[name="twitter:title"]', job.title + ' — Ardson Maritime Career Center');
+        setMeta('meta[name="twitter:description"]', description);
+
+        const isOpen = (job.status || 'open') === 'open';
+        const robots = document.querySelector('meta[name="robots"]');
+        if (robots) robots.setAttribute('content', isOpen ? 'index, follow, max-image-preview:large' : 'noindex, follow');
+
+        const salary = job.salary_min != null || job.salary_max != null
+            ? {
+                '@type': 'MonetaryAmount',
+                currency: job.salary_currency || 'USD',
+                value: {
+                    '@type': 'QuantitativeValue',
+                    minValue: job.salary_min != null ? Number(job.salary_min) : undefined,
+                    maxValue: job.salary_max != null ? Number(job.salary_max) : undefined,
+                    unitText: 'MONTH'
+                }
+            }
+            : undefined;
+
+        const payload = {
+            '@context': 'https://schema.org',
+            '@type': 'JobPosting',
+            title: job.title,
+            description: description,
+            identifier: { '@type': 'PropertyValue', name: 'Ardson Maritime', value: job.id },
+            datePosted: job.posted_at || new Date().toISOString().slice(0, 10),
+            validThrough: job.joining_date ? String(job.joining_date).slice(0, 10) + 'T23:59:59+07:00' : undefined,
+            employmentType: 'FULL_TIME',
+            hiringOrganization: {
+                '@type': 'Organization',
+                name: 'Ardson Maritime Career Center',
+                sameAs: base
+            },
+            jobLocation: {
+                '@type': 'Place',
+                address: {
+                    '@type': 'PostalAddress',
+                    addressLocality: 'Purbalingga',
+                    addressRegion: 'Central Java',
+                    addressCountry: 'ID'
+                }
+            },
+            directApply: true,
+            ...(salary ? { baseSalary: salary } : {})
+        };
+        let tag = document.getElementById('job-posting-schema');
+        if (!tag) {
+            tag = document.createElement('script');
+            tag.type = 'application/ld+json';
+            tag.id = 'job-posting-schema';
+            document.head.appendChild(tag);
+        }
+        tag.textContent = JSON.stringify(payload);
+    }
+
     function renderJob(root, job) {
         const c = job.salary_currency || 'USD';
+        const isOpen = (job.status || 'open') === 'open';
         const salaryText = (job.salary_min != null && job.salary_max != null)
             ? money(job.salary_min, c) + ' – ' + money(job.salary_max, c)
             : 'Negotiable';
@@ -177,13 +266,17 @@
                         </dl>
                     </div>
                     <div class="apply-card">
+                        ${isOpen ? `
                         <h2>Apply for this role</h2>
                         <p>Register your profile and upload your CV. Our crewing team will contact you within two working days.</p>
                         <button type="button" class="btn btn--primary btn--block" data-open-modal="seafarer-modal"
                             data-apply-title="${escapeHtml(job.title)}" data-apply-rank="${escapeHtml(job.title)}">
                             Apply now
                         </button>
-                        <p class="note">Free application under MLC 2006. No agency fee to seafarers.</p>
+                        <p class="note">Free application under MLC 2006. No agency fee to seafarers.</p>` : `
+                        <h2>This vacancy is closed</h2>
+                        <p>The admin console has closed or filled this position. Browse the current openings or register your profile for direct matching.</p>
+                        <a href="jobs.html" class="btn btn--primary btn--block">Browse vacancies</a>`}
                     </div>
                 </aside>
             </div>
@@ -192,6 +285,8 @@
     }
 
     function renderJobMissing(root) {
+        const robots = document.querySelector('meta[name="robots"]');
+        if (robots) robots.setAttribute('content', 'noindex, follow');
         root.innerHTML = `
             <div class="empty-state">
                 <svg fill="none" stroke="currentColor" stroke-width="1.25" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M20 20l-3.5-3.5"/></svg>
@@ -314,17 +409,70 @@
         }
     ];
 
+    function applyArticleSeo(article) {
+        const base = 'https://www.ardsonmaritime.com';
+        const slug = article.slug || (new URLSearchParams(window.location.search).get('slug') || '');
+        const url = base + '/insight?slug=' + encodeURIComponent(slug);
+        const description = String(article.lede || '').replace(/\s+/g, ' ').trim().slice(0, 300)
+            || 'Maritime insight from Ardson Maritime Career Center.';
+        const setMeta = (selector, value) => {
+            const el = document.querySelector(selector);
+            if (el) el.setAttribute('content', value);
+        };
+        const canonical = document.querySelector('link[rel="canonical"]');
+        if (canonical) canonical.setAttribute('href', url);
+        setMeta('meta[name="description"]', description);
+        setMeta('meta[property="og:type"]', 'article');
+        setMeta('meta[property="og:title"]', article.title + ' — Ardson Maritime Insight');
+        setMeta('meta[property="og:description"]', description);
+        setMeta('meta[property="og:url"]', url);
+        setMeta('meta[name="twitter:title"]', article.title + ' — Ardson Maritime Insight');
+        setMeta('meta[name="twitter:description"]', description);
+        if (article.image) {
+            setMeta('meta[property="og:image"]', article.image);
+            setMeta('meta[name="twitter:image"]', article.image);
+        }
+
+        const payload = {
+            '@context': 'https://schema.org',
+            '@type': 'Article',
+            headline: article.title,
+            description,
+            datePublished: article.date && !Number.isNaN(Date.parse(article.date))
+                ? new Date(article.date).toISOString()
+                : undefined,
+            author: { '@type': 'Organization', name: 'Ardson Maritime Career Center', url: base },
+            publisher: { '@type': 'Organization', name: 'Ardson Maritime Career Center', url: base },
+            mainEntityOfPage: url,
+            ...(article.image ? { image: article.image } : {})
+        };
+        let tag = document.getElementById('article-schema');
+        if (!tag) {
+            tag = document.createElement('script');
+            tag.type = 'application/ld+json';
+            tag.id = 'article-schema';
+            document.head.appendChild(tag);
+        }
+        tag.textContent = JSON.stringify(payload);
+    }
+
     function loadArticleDetail() {
         const root = $('#article-detail');
         if (!root) return;
+        const noindex = () => {
+            const robots = document.querySelector('meta[name="robots"]');
+            if (robots) robots.setAttribute('content', 'noindex, follow');
+        };
         const slug = (new URLSearchParams(window.location.search).get('slug') || '').trim();
         if (!slug) {
+            noindex();
             root.innerHTML = '<p style="color:var(--muted)">Article not found.</p>';
             return;
         }
 
         const render = (article) => {
             document.title = article.title + ' — Ardson Maritime Insight';
+            applyArticleSeo(article);
             const h1 = document.querySelector('.page-hero h1');
             if (h1) h1.textContent = article.title;
             const lede = document.querySelector('.page-hero .lede');
@@ -338,26 +486,41 @@
                     <span>${escapeHtml(article.date)} · ${escapeHtml(article.read)}</span>
                 </div>
                 ${article.image ? `<div class="article-media"><img src="${escapeHtml(article.image)}" alt="" loading="eager"></div>` : ''}
-                <div class="prose">${article.body}</div>
+                <div class="prose">${sanitizeHtml(article.body)}</div>
             `;
         };
 
         const fallback = () => {
             const article = ARTICLES.find((a) => a.slug === slug);
             if (!article) {
+                noindex();
                 root.innerHTML = '<p style="color:var(--muted)">Article not found.</p>';
                 return;
             }
             render(article);
         };
 
+        let apiReached = false;
         fetch(API_BASE + '/insights/' + encodeURIComponent(slug), {
             signal: AbortSignal.timeout(6000)
         })
-            .then((res) => (res.ok ? res.json() : null))
+            .then((res) => {
+                apiReached = true;
+                return res.ok ? res.json() : null;
+            })
             .then((payload) => {
                 const data = payload && payload.data;
-                if (!data || data.status !== 'published') return fallback();
+                if (!data || data.status !== 'published') {
+                    // The API answered: the article is deleted, renamed, or
+                    // unpublished. Do not resurrect the static copy.
+                    if (apiReached) {
+                        noindex();
+                        root.innerHTML = '<p style="color:var(--muted)">Article not found.</p>';
+                        return;
+                    }
+                    fallback();
+                    return;
+                }
                 render({
                     title: data.title,
                     tag: data.tag,
@@ -368,7 +531,14 @@
                     body: data.body
                 });
             })
-            .catch(fallback);
+            .catch(() => {
+                // Network failure only: the static article is a safe fallback.
+                if (!apiReached) fallback();
+                else {
+                    noindex();
+                    root.innerHTML = '<p style="color:var(--muted)">Article not found.</p>';
+                }
+            });
     }
 
     /* ------------------------------------------------------------
@@ -485,8 +655,17 @@
         fetch(API_BASE + '/insights', { signal: AbortSignal.timeout(6000) })
             .then((res) => (res.ok ? res.json() : null))
             .then((payload) => {
-                const list = (payload && payload.data) || [];
-                if (!list.length) return; // keep the static fallback cards
+                // Keep the static cards only when the API is unreachable.
+                // An empty published list means the admin unpublished or
+                // deleted every article, so the grid must be emptied too.
+                if (!payload || !Array.isArray(payload.data)) return;
+                const limit = Number(grid.getAttribute('data-limit')) || 0;
+                const list = limit > 0 ? payload.data.slice(0, limit) : payload.data;
+
+                if (!list.length) {
+                    grid.innerHTML = '<p class="muted" style="grid-column:1/-1">No articles published yet. Check back soon.</p>';
+                    return;
+                }
 
                 grid.innerHTML = list.map((article) => `
                     <article class="insight reveal">

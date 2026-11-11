@@ -30,12 +30,24 @@ const {
     newsletterRules
 } = require('./src/middleware/rules');
 const { sendNotification } = require('./src/services/notifier');
-const { scanFile: scanForVirus } = require('./src/services/virusScan');
+const { scanFile: scanForVirus, STRICT: VIRUS_SCAN_STRICT } = require('./src/services/virusScan');
 const { encryptFile } = require('./src/services/cipher');
+const { hasValidSignature } = require('./src/services/fileSignature');
+const { assertAuthConfigured } = require('./src/middleware/adminAuth');
 const adminRoutes = require('./src/routes/admin');
 const adminUploadRoutes = require('./src/routes/adminUploads');
 const app = express();
 const PORT = process.env.PORT || 4000;
+
+/*
+ * When the API runs behind a reverse proxy or load balancer, set
+ * TRUST_PROXY to the number of hops (usually 1) so rate limiting sees the
+ * real client IP. Leave it unset when clients connect directly.
+ */
+if (process.env.TRUST_PROXY) {
+    const hops = Number(process.env.TRUST_PROXY);
+    app.set('trust proxy', Number.isInteger(hops) ? hops : process.env.TRUST_PROXY);
+}
 
 /*
  * CORS allowlist. Production defaults to the live site; local development
@@ -57,7 +69,23 @@ const corsOrigin = (origin, cb) => {
    Security & parsers
    ------------------------------------------------------------ */
 app.use(helmet({
-    contentSecurityPolicy: false // frontend is served by a static host, not this API
+    contentSecurityPolicy: {
+        useDefaults: false,
+        directives: {
+            'default-src': ["'self'"],
+            'script-src': ["'self'", "'unsafe-inline'", 'https://www.googletagmanager.com'],
+            'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+            'font-src': ["'self'", 'data:', 'https://fonts.gstatic.com'],
+            'img-src': ["'self'", 'data:', 'https://images.unsplash.com', 'https://www.googletagmanager.com', 'https://*.google-analytics.com'],
+            'media-src': ["'self'", 'data:', 'blob:'],
+            'connect-src': ["'self'", 'https://*.google-analytics.com', 'https://www.googletagmanager.com'],
+            'frame-src': ['https://www.openstreetmap.org'],
+            'object-src': ["'none'"],
+            'base-uri': ["'self'"],
+            'form-action': ["'self'"],
+            'frame-ancestors': ["'none'"]
+        }
+    }
 }));
 app.use(cors({
     origin: corsOrigin,
@@ -102,6 +130,27 @@ const upload = multer({
         cb(null, true);
     }
 });
+
+/** Remove the temporary CV when a later middleware rejects the request. */
+const cleanupRejectedUpload = (req, res, next) => {
+    res.on('finish', () => {
+        if (req.file && res.statusCode >= 400) {
+            try { fs.unlinkSync(req.file.path); } catch (_e) { /* already removed */ }
+        }
+    });
+    next();
+};
+
+/** Reject files whose content does not match their extension. */
+const verifyCvSignature = (req, res, next) => {
+    if (!req.file) return next();
+    const ext = path.extname(req.file.filename || '').toLowerCase();
+    if (!hasValidSignature(req.file.path, ext)) {
+        try { fs.unlinkSync(req.file.path); } catch (_e) { /* already removed */ }
+        return fail(res, 'The uploaded file is not a valid PDF, DOC, or DOCX document.', 400);
+    }
+    return next();
+};
 
 /* ------------------------------------------------------------
    Helpers
@@ -148,7 +197,9 @@ app.get('/api/v1/insights/:slug', (req, res) => {
    ------------------------------------------------------------ */
 app.get('/api/v1/settings', (_req, res) => {
     const settings = store.getSettings();
-    res.setHeader('Cache-Control', 'no-store');
+    // Public copy changes rarely; allow a short shared cache so every page
+    // view does not hit the process. Admin writes still appear within a minute.
+    res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
     ok(res, { ok: true, data: settings });
 });
 
@@ -159,6 +210,8 @@ app.post(
     '/api/v1/seafarers/register',
     formLimiter,
     upload.single('cv_file'),
+    cleanupRejectedUpload,
+    verifyCvSignature,
     validate(seafarerRules),
     async (req, res) => {
         const certifications = [];
@@ -167,6 +220,11 @@ app.post(
             if (Array.isArray(raw)) certifications.push(...raw);
             else if (typeof raw === 'string') certifications.push(...JSON.parse(raw));
         } catch (_e) { /* ignore malformed payload */ }
+        const cleanCertifications = certifications
+            .filter((item) => typeof item === 'string')
+            .map((item) => item.trim().slice(0, 80))
+            .filter(Boolean)
+            .slice(0, 20);
 
         // Virus-scan the uploaded CV before persisting metadata. If no scanner
         // is configured (and VIRUS_SCAN_STRICT is off) the upload proceeds and
@@ -203,7 +261,7 @@ app.post(
             phone: req.body.phone,
             applied_rank: req.body.applied_rank,
             vessel_experience: req.body.vessel_experience,
-            certifications,
+            certifications: cleanCertifications,
             cv_file: req.file ? req.file.filename : null,
             source_ip: req.ip,
             virus_scan: virusScan
@@ -216,7 +274,7 @@ app.post(
                 'Email: ' + record.email,
                 'Rank: ' + record.applied_rank,
                 'Vessel: ' + record.vessel_experience,
-                'Certificates: ' + certifications.join(', ')
+                'Certificates: ' + cleanCertifications.join(', ')
             ]
         }).catch(() => {}); // never block the request on mailer failure
 
@@ -332,9 +390,9 @@ app.get('/api/v1/health', (req, res) => ok(res, { ok: true, service: 'ardson-mar
 if (process.env.SERVE_STATIC !== 'false') {
     const WEB_ROOT = path.join(__dirname, '..');
     // Source folders (partials, page bodies, build scripts) stay private.
-    const PRIVATE_FILES = /^\/(pages\.json|(prd|ipd|bsd|trd|afd|rtk)\.md)$/i;
+    const PRIVATE_FILES = /^\/(pages\.json|package(-lock)?\.json|(prd|ipd|bsd|trd|afd|rtk)\.md)$/i;
     app.use((req, res, next) => {
-        if (/^\/(_|scripts\/|server\/)/.test(req.path) || PRIVATE_FILES.test(req.path)) {
+        if (/^\/(\.|_|scripts\/|server\/|node_modules\/)/.test(req.path) || PRIVATE_FILES.test(req.path)) {
             return fail(res, 'Not found', 404);
         }
         // Candidate CVs are sensitive personal data — never publicly served.
@@ -355,7 +413,14 @@ if (process.env.SERVE_STATIC !== 'false') {
     app.use(express.static(WEB_ROOT, {
         extensions: ['html'],
         setHeaders: (res, filePath) => {
-            if (filePath.endsWith('.html')) res.setHeader('Cache-Control', 'no-cache');
+            if (filePath.endsWith('.html')) {
+                res.setHeader('Cache-Control', 'no-cache');
+            } else if (/\.(css|js)$/i.test(filePath)) {
+                // Unversioned filenames: a short cache keeps edits visible.
+                res.setHeader('Cache-Control', 'public, max-age=300');
+            } else if (/\.(png|jpe?g|webp|svg|ico|woff2?)$/i.test(filePath)) {
+                res.setHeader('Cache-Control', 'public, max-age=86400');
+            }
         }
     }));
 }
@@ -376,6 +441,17 @@ app.use((err, req, res, _next) => {
 /* ------------------------------------------------------------
    Boot
    ------------------------------------------------------------ */
+assertAuthConfigured();
+
+if (process.env.NODE_ENV === 'production') {
+    if (!process.env.CV_ENCRYPTION_KEY) {
+        console.warn('[security] CV_ENCRYPTION_KEY is not set — uploaded CVs will be stored unencrypted.');
+    }
+    if (!process.env.CLAMAV_HOST && !VIRUS_SCAN_STRICT) {
+        console.warn('[security] Virus scanning is not configured and VIRUS_SCAN_STRICT is off.');
+    }
+}
+
 app.listen(PORT, () => {
     console.log('Ardson Maritime API stub listening on http://localhost:' + PORT);
     console.log('CORS origins: ' + CORS_ORIGINS.join(', '));

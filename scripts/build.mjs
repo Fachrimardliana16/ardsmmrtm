@@ -173,7 +173,9 @@ const homeEntry = `    <url>
     </url>`;
 
 const entries = pages
-    .filter((p) => !p.noindex)
+    // job.html and insight.html are shells whose real URL carries ?id= /
+    // ?slug=; listing the empty shell would put a 404-equivalent in the index.
+    .filter((p) => !p.noindex && !['job', 'insight'].includes(p.slug))
     .map((p) => {
         const loc = SITE_URL + '/' + p.slug;
         const priority = p.priority ?? '0.7';

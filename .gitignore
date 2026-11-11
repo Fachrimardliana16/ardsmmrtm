@@ -3,4 +3,6 @@ node_modules/
 .preview/
 .env
 .env.*
+!.env.example
 *.log
+server/uploads/cv/

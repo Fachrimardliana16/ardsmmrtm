@@ -157,9 +157,9 @@
         }, duration);
     }
 
-    async function apiRequest(endpoint, options = {}) {
+    async function apiRequest(endpoint, options = {}, timeoutMs = 9000) {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 9000);
+        const timeout = setTimeout(() => controller.abort(), timeoutMs);
         try {
             const res = await fetch(API_BASE + endpoint, { credentials: 'same-origin', ...options, signal: controller.signal });
             clearTimeout(timeout);
@@ -374,8 +374,8 @@
     function jobCardHtml(job) {
         const currency = job.salary_currency || 'USD';
         const salaryText = (job.salary_min != null && job.salary_max != null)
-            ? money(job.salary_min, currency) + ' – ' + money(job.salary_max, currency)
-            : 'Negotiable';
+            ? money(job.salary_min, currency) + ' – ' + Number(job.salary_max).toLocaleString('en-US')
+            : (job.salary_min != null ? money(job.salary_min, currency) : 'Negotiable');
         const vesselParts = [job.vessel_type, vesselLabel(job.vessel_name)]
             .filter(Boolean)
             .map(escapeHtml)
@@ -385,12 +385,14 @@
             <article class="job-card" data-category="${escapeHtml(job.category)}" data-id="${escapeHtml(job.id)}">
                 <div class="job-card__top">
                     <div>
+                        <span class="job-card__tag">${escapeHtml(job.vessel_type || 'Maritime')}</span>
                         <h3 class="job-card__rank">${escapeHtml(job.title)}</h3>
                         <p class="job-card__vessel">${vesselParts}</p>
                     </div>
                     <div class="job-card__pay">
-                        <strong>${escapeHtml(salaryText)}</strong>
-                        <span>${escapeHtml(job.contract_duration || 'Standard contract')}</span>
+                        <span class="job-card__pay-label">Monthly salary</span>
+                        <strong class="job-card__pay-value">${escapeHtml(salaryText)}</strong>
+                        <span class="job-card__pay-note">${escapeHtml(job.contract_duration || 'Standard contract')}</span>
                     </div>
                 </div>
                 <p class="job-card__principal">
@@ -460,7 +462,10 @@
         if (skeleton) skeleton.style.display = 'grid';
         try {
             const res = await apiRequest('/jobs');
-            state.jobs = (res && Array.isArray(res.data) && res.data.length) ? res.data : SEED_JOBS;
+            // The API is authoritative: an empty board means every vacancy
+            // was removed or closed in the admin console. Seeds are only a
+            // fallback when the API cannot be reached at all.
+            state.jobs = (res && Array.isArray(res.data)) ? res.data : SEED_JOBS;
         } catch (_err) {
             state.jobs = SEED_JOBS;
         } finally {
@@ -620,7 +625,7 @@
                     fd.delete('certifications');
                     fd.append('certifications', JSON.stringify(certs));
 
-                    const res = await apiRequest('/seafarers/register', { method: 'POST', body: fd });
+                    const res = await apiRequest('/seafarers/register', { method: 'POST', body: fd }, 60000);
                     const ref = (res && res.data && res.data.reference) ? ' Ref: ' + res.data.reference : '';
                     showToast('Registration received.' + ref + ' We will contact you within 2 working days.', 'success', 6000);
                     seafarerForm.reset();

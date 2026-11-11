@@ -80,27 +80,6 @@
         "desc": "Contact the Ardson Maritime crewing team in Central Java for vacancies, registration, or crew requests."
     },
     {
-        "slug": "help",
-        "page": "help",
-        "crumb": "Help",
-        "title": "Help &amp; Tutorials — Ardson Maritime",
-        "desc": "Step-by-step guides for seafarers registering and applying, and for principals submitting crew requests.",
-        "faq": [
-            { "q": "Do seafarers pay a recruitment fee?", "a": "No. Placement is paid by the principal. Under MLC 2006, no manning agency may charge a seafarer for recruitment or placement." },
-            { "q": "How long does document verification take?", "a": "Two working days for a complete document set. Missing certificates are the most common reason it takes longer." },
-            { "q": "What file types can I upload?", "a": "PDF, DOC, or DOCX up to 5MB. Scanned images should be converted to PDF before upload." },
-            { "q": "Can I apply for more than one vacancy?", "a": "Yes. One profile covers every application and does not close other applications." }
-        ]
-    },
-    {
-        "slug": "profile",
-        "page": "profile",
-        "crumb": "My profile",
-        "title": "Seafarer Profile — Ardson Maritime Career Center",
-        "desc": "Keep your rank, vessel experience, and certificate status current so the crewing desk can propose you for a contract.",
-        "noindex": true
-    },
-    {
         "slug": "sitemap",
         "page": "sitemap",
         "crumb": "Sitemap",

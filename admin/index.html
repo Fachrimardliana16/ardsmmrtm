@@ -25,7 +25,12 @@
                 </span>
             </div>
 
-            <nav class="admin-nav" aria-label="Admin sections">
+            <button type="button" class="admin-menu-toggle" data-admin-menu aria-expanded="false" aria-controls="admin-nav" aria-label="Open menu">
+                <svg class="admin-menu-toggle__open" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/></svg>
+                <svg class="admin-menu-toggle__close" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>
+            </button>
+
+            <nav class="admin-nav" id="admin-nav" aria-label="Admin sections">
                 <div class="admin-nav__section">
                     <p class="admin-nav__group">Overview</p>
                     <a href="#" class="admin-nav__link is-active" data-view="dashboard">
@@ -105,15 +110,27 @@
                         <span class="admin-nav__count admin-nav__count--alert" data-nav-count="errors">–</span>
                     </a>
                 </div>
+
+                <div class="admin-nav__section admin-nav__mobile-only">
+                    <p class="admin-nav__group">Account</p>
+                    <a href="../index.html" class="admin-nav__link">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12H3m0 0l4-4m-4 4l4 4m8-11h3a1 1 0 011 1v14a1 1 0 01-1 1h-3"/></svg>
+                        <span class="admin-nav__label">View website</span>
+                    </a>
+                    <button type="button" class="admin-nav__link admin-nav__link--button" data-admin-logout>
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                        <span class="admin-nav__label">Sign out</span>
+                    </button>
+                </div>
             </nav>
 
             <div class="admin-sidebar__foot">
                 <div class="admin-user" data-admin-user>admin@ardsonmaritime.com</div>
-                <a href="../index.html" class="btn btn--onDark btn--sm btn--block">
+                <a href="../index.html" class="btn btn--onDark btn--sm btn--block" aria-label="View website" title="View website">
                     <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12H3m0 0l4-4m-4 4l4 4m8-11h3a1 1 0 011 1v14a1 1 0 01-1 1h-3"/></svg>
                     View website
                 </a>
-                <button type="button" class="btn btn--onDark btn--sm btn--block" data-admin-logout>
+                <button type="button" class="btn btn--onDark btn--sm btn--block" data-admin-logout aria-label="Sign out" title="Sign out">
                     <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                     Sign out
                 </button>
@@ -124,10 +141,11 @@
 
             <!-- Dashboard -->
             <section data-panel="dashboard">
-                <header class="admin-topbar">
+                <header class="admin-topbar admin-topbar--dashboard">
                     <div>
-                        <h1>Dashboard</h1>
-                        <p>Live overview of vacancies, candidates, and principal activity.</p>
+                        <p class="admin-greeting__eyebrow">Welcome back</p>
+                        <h1 class="admin-greeting">Good day, <span data-admin-firstname>Admin</span>!</h1>
+                        <p class="admin-datetime" data-admin-datetime>—</p>
                     </div>
                     <div class="admin-topbar__actions">
                         <button type="button" class="btn btn--ghost btn--sm" data-admin-refresh>Refresh data</button>
@@ -136,7 +154,7 @@
                 </header>
 
                 <div class="metric-grid" data-metric-grid>
-                    <div class="metric">
+                    <div class="metric metric--accent">
                         <div class="metric__label">Open vacancies</div>
                         <div class="metric__value" data-metric="openJobs">–</div>
                         <div class="metric__hint" data-metric-hint="totalJobs">– total published</div>
@@ -144,12 +162,12 @@
                     <div class="metric">
                         <div class="metric__label">Seafarer registrations</div>
                         <div class="metric__value" data-metric="seafarers">–</div>
-                        <div class="metric__hint">Pending document verification</div>
+                        <div class="metric__hint">Candidates in the pool</div>
                     </div>
                     <div class="metric">
                         <div class="metric__label">Crew requests</div>
                         <div class="metric__value" data-metric="crewRequests">–</div>
-                        <div class="metric__hint">Received from principals</div>
+                        <div class="metric__hint"><span data-metric-hint="openRequests">–</span> still open</div>
                     </div>
                     <div class="metric">
                         <div class="metric__label">Unread messages</div>
@@ -163,22 +181,68 @@
                     </div>
                 </div>
 
-                <div class="panel">
-                    <div class="panel__head">
-                        <div>
-                            <h2>Recent activity</h2>
-                            <p>Latest registrations and principal crew requests</p>
+                <div class="dashboard-grid">
+                    <div class="panel">
+                        <div class="panel__head">
+                            <div>
+                                <h2>Recent activity</h2>
+                                <p>Latest registrations and principal crew requests</p>
+                            </div>
+                        </div>
+                        <div class="panel__body">
+                            <div class="dashboard-split">
+                                <div>
+                                    <div class="metric__label">New seafarers</div>
+                                    <div class="mini-list" data-recent="seafarers"></div>
+                                </div>
+                                <div>
+                                    <div class="metric__label">Crew requests</div>
+                                    <div class="mini-list" data-recent="requests"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="panel__body">
-                        <div class="metric-grid" style="margin-bottom:0;grid-template-columns:1fr 1fr">
+
+                    <div class="panel">
+                        <div class="panel__head">
                             <div>
-                                <div class="metric__label">New seafarers</div>
-                                <div class="mini-list" data-recent="seafarers"></div>
+                                <h2>Latest vacancies</h2>
+                                <p>Recently published positions</p>
                             </div>
+                            <a href="#" class="btn btn--ghost btn--sm" data-view-link="jobs">View all</a>
+                        </div>
+                        <div class="panel__body">
+                            <div class="mini-list" data-recent="jobs"></div>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel__head">
                             <div>
-                                <div class="metric__label">Crew requests</div>
-                                <div class="mini-list" data-recent="requests"></div>
+                                <h2>System health</h2>
+                                <p>Errors and audit activity</p>
+                            </div>
+                            <a href="#" class="btn btn--ghost btn--sm" data-view-link="logs">Open logs</a>
+                        </div>
+                        <div class="panel__body">
+                            <div class="health-grid">
+                                <div class="health-tile">
+                                    <span class="health-tile__label">Errors</span>
+                                    <strong class="health-tile__value" data-health="errors">–</strong>
+                                </div>
+                                <div class="health-tile">
+                                    <span class="health-tile__label">Active users</span>
+                                    <strong class="health-tile__value" data-health="users">–</strong>
+                                </div>
+                                <div class="health-tile">
+                                    <span class="health-tile__label">Published insight</span>
+                                    <strong class="health-tile__value" data-health="insights">–</strong>
+                                </div>
+                            </div>
+                            <div class="quick-actions">
+                                <button type="button" class="btn btn--soft btn--sm" data-view-link="seafarers">Review seafarers</button>
+                                <button type="button" class="btn btn--soft btn--sm" data-view-link="requests">Process requests</button>
+                                <button type="button" class="btn btn--soft btn--sm" data-view-link="contacts">Open inbox</button>
                             </div>
                         </div>
                     </div>
@@ -202,13 +266,13 @@
                         <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M20 20l-3.5-3.5"/></svg>
                         <input type="search" placeholder="Search by rank, vessel, or principal" data-filter="jobs">
                     </div>
-                    <select data-filter-select="status" class="field" style="max-width:170px">
+                    <select data-filter-select="status" class="field toolbar-select" aria-label="Filter vacancies by status">
                         <option value="">All statuses</option>
                         <option value="open">Open</option>
                         <option value="filled">Filled</option>
                         <option value="closed">Closed</option>
                     </select>
-                    <select data-filter-select="category" class="field" style="max-width:170px">
+                    <select data-filter-select="category" class="field toolbar-select" aria-label="Filter vacancies by category">
                         <option value="">All departments</option>
                         <option value="deck">Deck</option>
                         <option value="engine">Engine</option>
@@ -249,6 +313,14 @@
                         <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M20 20l-3.5-3.5"/></svg>
                         <input type="search" placeholder="Search by name, email, or rank" data-filter="seafarers">
                     </div>
+                    <select data-filter-select="seafarer-status" class="field toolbar-select" aria-label="Filter by status">
+                        <option value="">All statuses</option>
+                        <option value="new">New</option>
+                        <option value="screening">Screening</option>
+                        <option value="verified">Verified</option>
+                        <option value="proposed">Proposed</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
                 </div>
 
                 <div class="table-wrap">
@@ -256,12 +328,12 @@
                         <thead>
                             <tr>
                                 <th>Reference</th>
-                                <th>Name</th>
-                                <th>Applied rank</th>
-                                <th>Vessel experience</th>
-                                <th>Certifications / Notes</th>
+                                <th>Seafarer</th>
+                                <th>Rank &amp; vessel</th>
+                                <th>Certifications</th>
                                 <th>Submitted</th>
                                 <th>Status</th>
+                                <th style="text-align:right">Actions</th>
                             </tr>
                         </thead>
                         <tbody data-table="seafarers"></tbody>
@@ -284,6 +356,16 @@
                         <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M20 20l-3.5-3.5"/></svg>
                         <input type="search" placeholder="Search by company or vessel type" data-filter="requests">
                     </div>
+                    <select data-filter-select="request-status" class="field toolbar-select" aria-label="Filter crew requests by status">
+                        <option value="">All statuses</option>
+                        <option value="new">New</option>
+                        <option value="emergency">Emergency</option>
+                        <option value="contacted">Contacted</option>
+                        <option value="shortlisting">Shortlisting</option>
+                        <option value="proposed">Proposed</option>
+                        <option value="fulfilled">Fulfilled</option>
+                        <option value="closed">Closed</option>
+                    </select>
                 </div>
 
                 <div class="table-wrap">
@@ -295,7 +377,8 @@
                                 <th>Vessel</th>
                                 <th>Ranks required</th>
                                 <th>Target joining</th>
-                                <th>Received</th>
+                                <th>Status</th>
+                                <th style="text-align:right">Actions</th>
                             </tr>
                         </thead>
                         <tbody data-table="requests"></tbody>
@@ -309,19 +392,29 @@
                 <header class="admin-topbar">
                     <div>
                         <h1>Messages</h1>
-                        <p>Enquiries from the public contact form.</p>
+                        <p>Enquiries from the public contact form — reply, triage, and archive.</p>
                     </div>
                 </header>
+
+                <div class="toolbar">
+                    <div class="log-tabs" role="tablist" aria-label="Message status">
+                        <button type="button" class="log-tab is-active" data-message-filter="all" role="tab" aria-selected="true">All</button>
+                        <button type="button" class="log-tab" data-message-filter="unread" role="tab" aria-selected="false">Unread</button>
+                        <button type="button" class="log-tab" data-message-filter="read" role="tab" aria-selected="false">Read</button>
+                        <button type="button" class="log-tab" data-message-filter="replied" role="tab" aria-selected="false">Replied</button>
+                        <button type="button" class="log-tab" data-message-filter="archived" role="tab" aria-selected="false">Archived</button>
+                    </div>
+                </div>
 
                 <div class="table-wrap">
                     <table>
                         <thead>
                             <tr>
                                 <th>From</th>
-                                <th>Email</th>
                                 <th>Message</th>
                                 <th>Received</th>
-                                <th style="text-align:right">Status</th>
+                                <th>Status</th>
+                                <th style="text-align:right">Actions</th>
                             </tr>
                         </thead>
                         <tbody data-table="contacts"></tbody>
@@ -335,18 +428,32 @@
                 <header class="admin-topbar">
                     <div>
                         <h1>Newsletter</h1>
-                        <p>Subscribers receiving vacancy alerts and regulatory updates.</p>
+                        <p>Seafarers and principals who opted in to vacancy alerts and maritime regulation updates. Export this list to your email tool to send a campaign.</p>
                     </div>
                     <div class="admin-topbar__actions">
                         <button type="button" class="btn btn--ghost btn--sm" data-admin-export>Export list (.csv)</button>
                     </div>
                 </header>
 
+                <div class="metric-grid metric-grid--compact">
+                    <div class="metric">
+                        <div class="metric__label">Total subscribers</div>
+                        <div class="metric__value" data-subscriber-count>–</div>
+                        <div class="metric__hint">Opt-in mailing list</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric__label">Latest signup</div>
+                        <div class="metric__value metric__value--sm" data-subscriber-latest>–</div>
+                        <div class="metric__hint">Most recent opt-in</div>
+                    </div>
+                </div>
+
                 <div class="table-wrap">
                     <table>
                         <thead>
                             <tr>
                                 <th>Email</th>
+                                <th>Subscribed</th>
                                 <th style="text-align:right">Actions</th>
                             </tr>
                         </thead>
@@ -361,20 +468,19 @@
                 <header class="admin-topbar">
                     <div>
                         <h1>Site settings</h1>
-                        <p>Brand, contact details, social links, and the home hero. Changes apply to the public site.</p>
+                        <p>Brand, contact details, page copy, repeated content, and the home hero. Changes apply to the public site.</p>
                     </div>
                     <div class="admin-topbar__actions">
                         <button type="button" class="btn btn--ghost btn--sm" data-settings-reset="site">Reset site</button>
                         <button type="button" class="btn btn--ghost btn--sm" data-settings-reset="hero">Reset hero</button>
-                        <button type="button" class="btn btn--ghost btn--sm" data-settings-reset="help">Reset help</button>
                     </div>
                 </header>
 
                 <div class="settings-tabs" role="tablist" aria-label="Settings sections">
                     <button type="button" class="settings-tab is-active" data-settings-tab="site" role="tab" aria-selected="true">Website</button>
                     <button type="button" class="settings-tab" data-settings-tab="hero" role="tab" aria-selected="false">Hero</button>
-                    <button type="button" class="settings-tab" data-settings-tab="help" role="tab" aria-selected="false">Help centre</button>
-                    <button type="button" class="settings-tab" data-settings-tab="buttons" role="tab" aria-selected="false">Header buttons</button>
+                    <button type="button" class="settings-tab" data-settings-tab="pages" role="tab" aria-selected="false">Pages</button>
+                    <button type="button" class="settings-tab" data-settings-tab="blocks" role="tab" aria-selected="false">Content</button>
                 </div>
 
                 <form id="settings-site-form" class="panel" data-settings-form="site">
@@ -457,6 +563,11 @@
                                 <label for="set-lng">Longitude</label>
                                 <input id="set-lng" name="longitude" type="number" step="0.0001" placeholder="109.3654">
                             </div>
+                        </div>
+                        <div class="field">
+                            <label for="set-hours">Working hours</label>
+                            <input id="set-hours" name="hours" placeholder="Mon–Fri, 08:00–17:00 WIB · Duty desk 24/7">
+                            <span class="field__hint">Shown on the contact page and in the home About section.</span>
                         </div>
                         <div class="form-grid form-grid--3">
                             <div class="field">
@@ -571,103 +682,89 @@
                     </div>
                 </form>
 
-                <form id="settings-help-form" class="panel" data-settings-form="help" hidden>
+                <form id="settings-pages-form" class="panel" data-settings-form="pages" hidden>
                     <div class="panel__head">
                         <div>
-                            <h2>Help centre</h2>
-                            <p>Intro copy at the top of help.html and the closing contact note. The step-by-step guides stay in the page.</p>
+                            <h2>Page content</h2>
+                            <p>Override the hero copy, meta title, and meta description of any page. Legal pages can replace their full body.</p>
+                        </div>
+                        <div class="admin-topbar__actions">
+                            <button type="button" class="btn btn--ghost btn--sm" data-page-load>Load current page</button>
                         </div>
                     </div>
                     <div class="panel__body">
-                        <div class="field">
-                            <label for="set-help-eyebrow">Eyebrow</label>
-                            <input id="set-help-eyebrow" name="eyebrow" placeholder="Help centre">
+                        <div class="form-grid form-grid--2">
+                            <div class="field">
+                                <label for="page-slug">Page</label>
+                                <select id="page-slug" data-page-select></select>
+                            </div>
+                            <div class="field">
+                                <label>Status</label>
+                                <p class="field__hint" data-page-status>No override saved. Fields show the live page copy.</p>
+                            </div>
                         </div>
                         <div class="field">
-                            <label for="set-help-title">Page heading</label>
-                            <input id="set-help-title" name="title" placeholder="Step-by-step guides for seafarers and principals">
+                            <label for="page-title">Meta title</label>
+                            <input id="page-title" data-page-field="title" placeholder="Page title shown in the browser tab and search results">
                         </div>
                         <div class="field">
-                            <label for="set-help-lede">Intro paragraph</label>
-                            <textarea id="set-help-lede" name="lede" rows="3"></textarea>
+                            <label for="page-description">Meta description</label>
+                            <textarea id="page-description" data-page-field="description" rows="3" placeholder="150–160 characters reads best"></textarea>
+                        </div>
+                        <div class="form-grid form-grid--2">
+                            <div class="field">
+                                <label for="page-eyebrow">Hero eyebrow</label>
+                                <input id="page-eyebrow" data-page-field="eyebrow" placeholder="For seafarers">
+                            </div>
+                            <div class="field">
+                                <label for="page-heading">Hero heading</label>
+                                <input id="page-heading" data-page-field="heading" placeholder="Page headline">
+                            </div>
                         </div>
                         <div class="field">
-                            <label for="set-help-contact">Closing contact note</label>
-                            <textarea id="set-help-contact" name="contact_note" rows="2"></textarea>
-                            <span class="field__hint">Shown in the "Still stuck?" band at the bottom of help.html.</span>
+                            <label for="page-lede">Hero intro</label>
+                            <textarea id="page-lede" data-page-field="lede" rows="3"></textarea>
                         </div>
-                        <button type="submit" class="btn btn--primary">Save help centre</button>
+                        <div class="field">
+                            <label for="page-body">Legal body (HTML)</label>
+                            <textarea id="page-body" data-page-field="body" rows="14" placeholder="&lt;h2&gt;…&lt;/h2&gt;&lt;p&gt;…&lt;/p&gt;"></textarea>
+                            <span class="field__hint">Used on Privacy, Terms, and MLC Compliance only. Leave blank to keep the built-in body.</span>
+                        </div>
+                        <div class="admin-topbar__actions">
+                            <button type="submit" class="btn btn--primary">Save page content</button>
+                            <button type="button" class="btn btn--ghost" data-page-clear>Clear override</button>
+                        </div>
                     </div>
                 </form>
 
-                <form id="settings-profile-button-form" class="panel" data-settings-form="profile_button" data-settings-group="buttons" hidden>
+                <form id="settings-blocks-form" class="panel" data-settings-form="blocks" hidden>
                     <div class="panel__head">
                         <div>
-                            <h2>Profile button</h2>
-                            <p>The icon in the header that points seafarers to their profile or to registration.</p>
+                            <h2>Repeated content</h2>
+                            <p>Audience cards, trust points, training programmes, FAQs, and process steps used across the site.</p>
                         </div>
                     </div>
                     <div class="panel__body">
-                        <div class="form-grid form-grid--2">
-                            <div class="field">
-                                <label for="set-profile-enabled">Show in header</label>
-                                <select id="set-profile-enabled" name="enabled">
-                                    <option value="1">Yes</option>
-                                    <option value="0">No</option>
-                                </select>
-                            </div>
-                            <div class="field">
-                                <label for="set-profile-mode">Button action</label>
-                                <select id="set-profile-mode" name="mode">
-                                    <option value="profile">Open profile page</option>
-                                    <option value="modal">Open registration form</option>
-                                    <option value="hidden">Hide the button</option>
-                                </select>
-                            </div>
+                        <div class="field">
+                            <label for="block-key">Section</label>
+                            <select id="block-key" data-block-select>
+                                <option value="audience">Home — audience cards</option>
+                                <option value="trust">Home — trust strip</option>
+                                <option value="training">Home — training programmes</option>
+                                <option value="faq">Contact — FAQ</option>
+                                <option value="stepsSeafarers">Seafarers — process steps</option>
+                                <option value="stepsPrincipals">Principals — engagement steps</option>
+                                <option value="stepsEmergency">Emergency — how it works</option>
+                            </select>
                         </div>
-                        <div class="form-grid form-grid--2">
-                            <div class="field">
-                                <label for="set-profile-label">Tooltip / aria label</label>
-                                <input id="set-profile-label" name="label" placeholder="My profile">
-                            </div>
-                            <div class="field">
-                                <label for="set-profile-href">Link target</label>
-                                <input id="set-profile-href" name="href" placeholder="profile.html">
-                                <span class="field__hint">Used only when the action is "Open profile page".</span>
-                            </div>
+                        <div data-block-editor></div>
+                        <div class="admin-topbar__actions" style="margin-top:1.5rem">
+                            <button type="submit" class="btn btn--primary">Save section</button>
+                            <button type="button" class="btn btn--ghost" data-block-reset>Reset section</button>
                         </div>
-                        <button type="submit" class="btn btn--primary">Save profile button</button>
                     </div>
                 </form>
 
-                <form id="settings-help-button-form" class="panel" data-settings-form="help_button" data-settings-group="buttons" hidden>
-                    <div class="panel__head">
-                        <div>
-                            <h2>Help button</h2>
-                            <p>The question-mark icon in the header that opens the help centre.</p>
-                        </div>
-                    </div>
-                    <div class="panel__body">
-                        <div class="form-grid form-grid--2">
-                            <div class="field">
-                                <label for="set-help-btn-enabled">Show in header</label>
-                                <select id="set-help-btn-enabled" name="enabled">
-                                    <option value="1">Yes</option>
-                                    <option value="0">No</option>
-                                </select>
-                            </div>
-                            <div class="field">
-                                <label for="set-help-btn-label">Tooltip / aria label</label>
-                                <input id="set-help-btn-label" name="label" placeholder="Help and tutorials">
-                            </div>
-                        </div>
-                        <div class="field">
-                            <label for="set-help-btn-href">Link target</label>
-                            <input id="set-help-btn-href" name="href" placeholder="help.html">
-                        </div>
-                        <button type="submit" class="btn btn--primary">Save help button</button>
-                    </div>
-                </form>
             </section>
 
             <!-- Maritime Insight articles -->
@@ -687,7 +784,7 @@
                         <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M20 20l-3.5-3.5"/></svg>
                         <input type="search" placeholder="Search by title or tag" data-filter="insights">
                     </div>
-                    <select data-filter-select="insight-status" class="field" style="max-width:170px">
+                    <select data-filter-select="insight-status" class="field toolbar-select" aria-label="Filter insight articles by status">
                         <option value="">All statuses</option>
                         <option value="published">Published</option>
                         <option value="draft">Draft</option>
@@ -863,6 +960,25 @@
                         <button type="button" class="btn btn--ghost btn--sm" data-admin-clear-logs>Clear shown logs</button>
                     </div>
                 </header>
+
+                <div class="log-summary" aria-label="Log summary">
+                    <div class="log-summary__card log-summary__card--all">
+                        <span>All events</span>
+                        <strong data-log-summary="all">–</strong>
+                    </div>
+                    <div class="log-summary__card log-summary__card--info">
+                        <span>Info</span>
+                        <strong data-log-summary="info">–</strong>
+                    </div>
+                    <div class="log-summary__card log-summary__card--warning">
+                        <span>Warning</span>
+                        <strong data-log-summary="warning">–</strong>
+                    </div>
+                    <div class="log-summary__card log-summary__card--error">
+                        <span>Error</span>
+                        <strong data-log-summary="error">–</strong>
+                    </div>
+                </div>
 
                 <div class="toolbar">
                     <div class="log-tabs" role="tablist" aria-label="Log level">
@@ -1150,21 +1266,44 @@
         </div>
     </div>
 
+    <!-- Seafarer detail modal -->
+    <div id="seafarer-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="seafarer-modal-title" aria-hidden="true">
+        <div class="modal__panel">
+            <button type="button" class="modal__close" data-modal-close="seafarer-modal" aria-label="Close seafarer detail">
+                <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>
+            </button>
+            <div class="modal__head">
+                <span class="eyebrow" data-seafarer-ref>Seafarer profile</span>
+                <h2 id="seafarer-modal-title" data-seafarer-title>Seafarer</h2>
+                <p data-seafarer-subtitle>Registration details and screening notes.</p>
+            </div>
+            <div class="modal__form" data-seafarer-detail></div>
+        </div>
+    </div>
+
+    <!-- Generic record detail modal (all tables) -->
+    <div id="record-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="record-modal-title" aria-hidden="true">
+        <div class="modal__panel">
+            <button type="button" class="modal__close" data-modal-close="record-modal" aria-label="Close detail">
+                <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>
+            </button>
+            <div class="modal__head">
+                <span class="eyebrow" data-record-eyebrow>Record</span>
+                <h2 id="record-modal-title" data-record-title>Record detail</h2>
+                <p data-record-subtitle></p>
+            </div>
+            <div class="modal__form record-detail" data-record-body></div>
+        </div>
+    </div>
+
     <script>
         window.ARDSON_ADMIN_CONFIG = { apiBase: '/api/v1/admin', login: 'login.html' };
-        var qToken = new URLSearchParams(location.search).get('token');
-        window.ARDSON_ADMIN_TOKEN = sessionStorage.getItem('ardson_admin_token') || qToken;
-        if (qToken && !sessionStorage.getItem('ardson_admin_token')) {
-            sessionStorage.setItem('ardson_admin_token', qToken);
-        }
+        window.ARDSON_ADMIN_TOKEN = sessionStorage.getItem('ardson_admin_token');
         if (!window.ARDSON_ADMIN_TOKEN) {
             window.location.replace('login.html');
         }
-        // Remove the token from the URL so it does not linger in history/logs.
-        if (qToken && history.replaceState) {
-            history.replaceState(null, '', location.pathname);
-        }
     </script>
+    <script src="../js/sanitize.js" defer></script>
     <script src="../js/admin.js" defer></script>
 </body>
 </html>

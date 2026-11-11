@@ -21,14 +21,12 @@ const fs = require('node:fs');
 
 const CLAMAV_HOST = process.env.CLAMAV_HOST || '';
 const CLAMAV_PORT = Number(process.env.CLAMAV_PORT || 3310);
-const STRICT = process.env.VIRUS_SCAN_STRICT === '1';
+const STRICT = ['1', 'true', 'yes'].includes(String(process.env.VIRUS_SCAN_STRICT || '').toLowerCase());
 
 function scanViaClamd(filePath) {
     return new Promise((resolve, reject) => {
         const socket = net.connect({ host: CLAMAV_HOST, port: CLAMAV_PORT }, () => {
             // INSTREAM protocol: send the chunk size prefix + bytes + zero terminator.
-            const sizeBuf = Buffer.alloc(4);
-            sizeBuf.writeUInt32BE(0, 0); // chunk length placeholder (we write in chunks below)
             socket.write('zINSTREAM\0');
             const readStream = fs.createReadStream(filePath);
             readStream.on('data', (chunk) => {

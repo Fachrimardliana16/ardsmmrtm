@@ -8,6 +8,7 @@
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const store = require('../data/store');
 const { validate } = require('../middleware/validate');
 const { requireAdmin, verifyCredentials, issueToken, revokeToken, ADMIN_USER } = require('../middleware/adminAuth');
@@ -16,8 +17,21 @@ const { decryptFile, encryptionEnabled } = require('../services/cipher');
 
 const router = express.Router();
 
+/**
+ * Brute-force protection: only failed attempts count, so a normal sign-in
+ * does not eat into the budget. Successful logins reset the counter.
+ */
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 8,
+    standardHeaders: true,
+    legacyHeaders: false,
+    skipSuccessfulRequests: true,
+    message: { ok: false, message: 'Too many sign-in attempts. Try again in 15 minutes.' }
+});
+
 /* ---------- Auth ---------- */
-router.post('/login', validate(loginRules), (req, res) => {
+router.post('/login', loginLimiter, validate(loginRules), (req, res) => {
     const { user, password } = req.body;
     if (!verifyCredentials(user, password)) {
         return res.status(401).json({ ok: false, message: 'Invalid email or password.' });
@@ -48,9 +62,13 @@ router.get('/stats', (_req, res) => {
     const recentRequests = store.listCrewRequests()
         .slice(-5)
         .reverse()
-        .map((r) => ({ reference: r.reference, company: r.company_name, vessel: r.vessel_type, created_at: r.created_at }));
+        .map((r) => ({ reference: r.reference, company: r.company_name, vessel: r.vessel_type, status: r.status, created_at: r.created_at }));
+    const recentJobs = store.listAllJobs()
+        .slice(-5)
+        .reverse()
+        .map((j) => ({ id: j.id, title: j.title, principal: j.principal, status: j.status, created_at: j.created_at }));
 
-    return res.json({ ok: true, data: { stats: store.stats(), recentSeafarers, recentRequests } });
+    return res.json({ ok: true, data: { stats: store.stats(), recentSeafarers, recentRequests, recentJobs } });
 });
 
 /* ---------- Jobs ---------- */
@@ -159,7 +177,9 @@ router.get('/seafarers/:id/cv', (req, res) => {
     const record = store.listSeafarers().find((s) => s.id === req.params.id);
     if (!record || !record.cv_file) return res.status(404).json({ ok: false, message: 'CV not found.' });
     const file = path.resolve(CV_DIR, record.cv_file);
-    if (!file.startsWith(CV_DIR)) return res.status(400).json({ ok: false, message: 'Invalid CV path.' });
+    if (file !== CV_DIR && !file.startsWith(CV_DIR + path.sep)) {
+        return res.status(400).json({ ok: false, message: 'Invalid CV path.' });
+    }
     if (!fs.existsSync(file)) return res.status(404).json({ ok: false, message: 'CV file missing on disk.' });
     const ext = path.extname(file).toLowerCase();
     const filename = 'CV-' + (record.name || record.id).replace(/[^\w.-]+/g, '_') + ext;
@@ -188,6 +208,22 @@ router.get('/crew-requests', (_req, res) => {
     return res.json({ ok: true, count: data.length, data });
 });
 
+router.patch('/crew-requests/:id', (req, res) => {
+    const status = req.body?.status;
+    const allowed = ['new', 'emergency', 'contacted', 'shortlisting', 'proposed', 'fulfilled', 'closed'];
+    if (status !== undefined && !allowed.includes(String(status))) {
+        return res.status(400).json({ ok: false, message: 'Unknown crew request status.' });
+    }
+    const updated = store.updateCrewRequest(req.params.id, {
+        status: status !== undefined ? String(status) : undefined,
+        notes: req.body?.notes,
+        assigned_to: req.body?.assigned_to
+    });
+    if (!updated) return res.status(404).json({ ok: false, message: 'Crew request not found.' });
+    store.recordLog('info', req.adminUser || 'admin', 'Updated crew request', updated.reference, `status → ${updated.status}`);
+    return res.json({ ok: true, data: updated });
+});
+
 /* ---------- Contacts ---------- */
 router.get('/contacts', (_req, res) => {
     const data = store.listContacts();
@@ -200,9 +236,24 @@ router.patch('/contacts/:id/read', (req, res) => {
     return res.json({ ok: true, data: updated });
 });
 
+router.patch('/contacts/:id', (req, res) => {
+    const status = req.body?.status;
+    const allowed = ['unread', 'read', 'replied', 'archived'];
+    if (status !== undefined && !allowed.includes(String(status))) {
+        return res.status(400).json({ ok: false, message: 'Unknown message status.' });
+    }
+    const updated = store.updateContact(req.params.id, {
+        status: status !== undefined ? String(status) : undefined,
+        notes: req.body?.notes
+    });
+    if (!updated) return res.status(404).json({ ok: false, message: 'Message not found.' });
+    store.recordLog('info', req.adminUser || 'admin', 'Updated message', updated.email, `status → ${updated.status}`);
+    return res.json({ ok: true, data: updated });
+});
+
 /* ---------- Newsletter ---------- */
 router.get('/subscribers', (_req, res) => {
-    const data = store.listSubscribers().map((email) => ({ email }));
+    const data = store.listSubscribers();
     return res.json({ ok: true, count: data.length, data });
 });
 
@@ -213,7 +264,7 @@ router.get('/settings', (_req, res) => {
 
 router.patch('/settings/:section', (req, res) => {
     const section = String(req.params.section || '');
-    if (!['site', 'hero', 'help', 'profile_button', 'help_button'].includes(section)) {
+    if (!['site', 'hero', 'help', 'profile_button', 'help_button', 'pages', 'blocks'].includes(section)) {
         return res.status(400).json({ ok: false, message: 'Unknown settings section.' });
     }
     const updated = store.updateSettings(section, req.body || {});
@@ -222,9 +273,16 @@ router.patch('/settings/:section', (req, res) => {
     return res.json({ ok: true, message: `${section === 'site' ? 'Website' : section.replace('_', ' ')} settings saved.`, data: updated });
 });
 
+router.post('/settings/blocks/:key/reset', (req, res) => {
+    const key = String(req.params.key || '');
+    const updated = store.resetBlock(key);
+    store.recordLog('warning', req.adminUser || 'admin', 'Reset content block', key, 'Restored defaults');
+    return res.json({ ok: true, message: 'Section restored.', data: updated });
+});
+
 router.post('/settings/:section/reset', (req, res) => {
     const section = String(req.params.section || '');
-    if (!['site', 'hero', 'help', 'profile_button', 'help_button', 'all'].includes(section)) {
+    if (!['site', 'hero', 'help', 'profile_button', 'help_button', 'pages', 'blocks', 'all'].includes(section)) {
         return res.status(400).json({ ok: false, message: 'Unknown settings section.' });
     }
     const updated = store.resetSettings(section === 'all' ? null : section);

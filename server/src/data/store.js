@@ -229,6 +229,7 @@ const DEFAULT_SETTINGS = {
         phone: '(+62) 852-1125-4485',
         phone_link: '+6285211254485',
         address: 'Purbalingga, Central Java, Indonesia',
+        hours: 'Mon–Fri 08:00–17:00 WIB · Sat 08:00–13:00 WIB',
         city: 'Purbalingga',
         region: 'Central Java',
         country: 'Indonesia',
@@ -295,12 +296,123 @@ const DEFAULT_SETTINGS = {
         title: 'Verified seafarers,',
         title_accent: "ready for the world's fleets",
         lede: 'Ardson Maritime connects Indonesian officers and ratings with international shipowners. Every candidate is screened against STCW 2010 requirements, with certificates, sea service, and medical fitness verified before embarkation.',
-        primary_label: 'Explore vacancies',
-        primary_href: 'jobs.html',
         secondary_label: 'Submit crew requirement',
         secondary_href: '#',
         badge_title: 'MLC 2006 compliant',
         badge_text: 'Zero recruitment fees for seafarers'
+    },
+    /**
+     * Per-page overrides edited from Settings → Pages. Empty object means
+     * every page keeps the copy baked into its HTML file.
+     */
+    pages: {},
+    /**
+     * Reusable content blocks rendered by js/site.js. Stored here so the
+     * admin console can edit them without rebuilding the static pages.
+     */
+    blocks: {
+        audience: {
+            eyebrow: 'Get started',
+            title: 'Choose your path',
+            lede: 'Seafarers: create a free profile and apply for open contracts. Principals: submit a crewing requirement and receive a screened shortlist. Both forms take about five minutes.',
+            items: [
+                {
+                    key: 'seafarers',
+                    tag: 'For seafarers',
+                    title: 'Your next voyage starts here',
+                    text: 'Build a professional mariner profile, upload your STCW certificates and sea service records, then apply for verified contracts across container, tanker, offshore, and cruise fleets.',
+                    image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=900',
+                    bullets: [
+                        'Direct placement with certified shipowners',
+                        'Free application, no recruitment fees',
+                        'Documentation and visa assistance to joining'
+                    ],
+                    primary_label: 'Register as seafarer',
+                    secondary_label: 'How registration works',
+                    secondary_href: 'seafarers.html'
+                },
+                {
+                    key: 'principals',
+                    tag: 'For principals',
+                    title: 'Crew that meet your standard',
+                    text: 'We source officers and ratings with verified backgrounds, including document authenticity, sea service records, medical fitness, and English proficiency.',
+                    image: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?auto=format&fit=crop&q=80&w=900',
+                    bullets: [
+                        'Rigorous screening and Marlins testing',
+                        'STCW 2010 and MLC 2006 compliance',
+                        'Emergency replacement and rapid mobilisation'
+                    ],
+                    primary_label: 'Submit crew request',
+                    secondary_label: 'See crewing services',
+                    secondary_href: 'principals.html'
+                }
+            ]
+        },
+        trust: {
+            eyebrow: 'Compliance',
+            title: 'Verified at every step',
+            items: [
+                { title: '100% verified', text: 'Every certificate and sea-service record checked before embarkation' },
+                { title: 'STCW 2010', text: 'Training and certification aligned with the Manila amendments' },
+                { title: 'MLC 2006', text: 'Zero-fee recruitment and seafarer rights protection' },
+                { title: 'Global network', text: 'Principals across Asia, Europe, the Middle East, and beyond' }
+            ]
+        },
+        training: {
+            eyebrow: 'Professional development',
+            title: 'Training and certification',
+            lede: 'Guidance for Indonesian seafarers to keep qualifications aligned with industry requirements and flag state expectations.',
+            link_label: 'All programmes',
+            link_href: 'training.html',
+            items: [
+                { num: '01', title: 'Safety readiness & STCW', text: 'Support for BST, SCRB, AFF, MEFA, and revalidation courses at accredited maritime training institutes.', link_label: 'Explore programme', link_href: 'training.html#stcw' },
+                { num: '02', title: 'Tanker & special certificates', text: 'Guidance for Gas (LPG/LNG), Oil, and Chemical tanker endorsements at basic and advanced levels.', link_label: 'Explore programme', link_href: 'training.html#tanker' },
+                { num: '03', title: 'Maritime English & Marlins', text: 'Preparation for the Marlins Test and Standard Marine Communication Phrases ahead of principal interviews.', link_label: 'Explore programme', link_href: 'training.html#english' }
+            ]
+        },
+        faq: {
+            eyebrow: 'Before you write',
+            title: 'Answers to the questions we get most',
+            items: [
+                { title: 'Do you charge seafarers a fee?', text: 'No. Placement is paid by the principal. Under MLC 2006, no manning agency may charge a seafarer for recruitment or placement.' },
+                { title: 'How long does registration take?', text: 'The form takes about five minutes. Document verification is usually completed within two working days.' },
+                { title: 'Which ranks do you place?', text: 'Deck, engine, and hotel ranks from ratings to master and chief engineer, across container, tanker, gas, bulk, offshore, and cruise tonnage.' },
+                { title: 'How fast can a crew request be answered?', text: 'A first shortlist is typically returned within one working day of receiving a complete specification.' }
+            ]
+        },
+        stepsSeafarers: {
+            eyebrow: 'The process',
+            title: 'How registration works',
+            lede: 'Most placements complete within four to six weeks of a complete profile.',
+            items: [
+                { title: 'Register', text: 'Complete the registration form with your rank, vessel experience, and certificate status. Upload a CV or sea service record.' },
+                { title: 'Verification', text: 'Our crewing team reviews your documents and confirms which flag endorsements you still need.' },
+                { title: 'Interview', text: "A technical interview with the principal's superintendent, plus a Marlins or equivalent English test." },
+                { title: 'Joining', text: 'Contract signed under MLC 2006, visa and endorsement processed, ticket issued, joining confirmed in writing.' }
+            ]
+        },
+        stepsPrincipals: {
+            eyebrow: 'Engagement model',
+            title: 'How a crew request runs',
+            lede: 'From your specification to joining, typically under 30 days for ratings and 45 days for senior officers.',
+            items: [
+                { title: 'Send the specification', text: 'Ranks, vessel type, flag, joining port, and contract terms. A short call confirms the standing orders and interview format.' },
+                { title: 'Candidate proposal', text: 'Within 24 hours we return a shortlist with CVs, certificate status, sea service, and Marlins scores.' },
+                { title: 'Interview and selection', text: 'Interviews arranged around your time zone. We coordinate technical assessments and reference checks.' },
+                { title: 'Mobilisation', text: 'Contract, visa, flag endorsement, medical, and travel handled end to end, with a joining report before departure.' }
+            ]
+        },
+        stepsEmergency: {
+            eyebrow: '01 — How it works',
+            title: 'Four steps from gap to gangway',
+            lede: "A 24/7 duty desk receives the request, pulls a verified stand-by from the pool, and handles documentation and travel in parallel so the joining date doesn't slip.",
+            items: [
+                { title: '1 · Request received', text: 'The duty desk acknowledges inside 30 minutes and confirms the rank, vessel, port, and target joining.' },
+                { title: '2 · Candidate proposed', text: "Within 6 hours we send 1–3 verified stand-bys with valid Seaman's Book, CoC, medical, and visas already checked." },
+                { title: '3 · Travel booked', text: 'Flights, hotel, and shore transfer booked same day. Flag-state and port-state notifications prepared.' },
+                { title: '4 · Handover complete', text: 'Relief crew signs on at the agreed port; handover brief with outgoing officer documented for the master.' }
+            ]
+        }
     },
     /**
      * Help centre page content, edited from the admin console.
@@ -654,6 +766,17 @@ module.exports = {
         return record;
     },
     listCrewRequests: () => [...crewRequests],
+    getCrewRequest: (id) => crewRequests.find(r => r.id === id) || null,
+    updateCrewRequest: (id, patch = {}) => {
+        const r = crewRequests.find(x => x.id === id);
+        if (!r) return null;
+        const allowed = ['status', 'notes', 'assigned_to'];
+        allowed.forEach((key) => {
+            if (patch[key] !== undefined) r[key] = patch[key];
+        });
+        r.updated_at = new Date().toISOString();
+        return r;
+    },
 
     /* ---------------- Contacts ---------------- */
     createContact: (data) => {
@@ -675,6 +798,14 @@ module.exports = {
         r.status = 'read';
         return r;
     },
+    updateContact: (id, patch = {}) => {
+        const r = contacts.find(c => c.id === id);
+        if (!r) return null;
+        if (patch.status !== undefined) r.status = patch.status;
+        if (patch.notes !== undefined) r.notes = patch.notes;
+        r.updated_at = new Date().toISOString();
+        return r;
+    },
 
     /* ---------------- Newsletter ---------------- */
     createSubscriber: (email) => {
@@ -684,7 +815,7 @@ module.exports = {
         }
         return clean;
     },
-    listSubscribers: () => [...subscribers].map(s => ({ email: s.email })),
+    listSubscribers: () => [...subscribers].map(s => ({ email: s.email, subscribed_at: s.subscribed_at || null })),
 
     /* ---------------- Dashboard stats ---------------- */
     stats: () => ({
@@ -692,6 +823,7 @@ module.exports = {
         totalJobs: jobs.length,
         seafarers: seafarers.length,
         crewRequests: crewRequests.length,
+        openRequests: crewRequests.filter(r => !['fulfilled', 'closed'].includes(r.status)).length,
         unreadContacts: contacts.filter(c => c.status === 'unread').length,
         subscribers: subscribers.length,
         users: adminUsers.length,
@@ -751,16 +883,29 @@ module.exports = {
     /* ---------------- Settings ---------------- */
     getSettings: () => clone(settings),
     updateSettings: (section, patch) => {
+        /* Never let a payload rewrite an object's prototype. */
+        const source = patch && typeof patch === 'object' && !Array.isArray(patch) ? patch : {};
+        const safeKeys = Object.keys(source).filter((key) => !['__proto__', 'constructor', 'prototype'].includes(key));
+        const safe = {};
+        safeKeys.forEach((key) => { safe[key] = source[key]; });
+
         if (section === 'site') {
             settings.site = {
                 ...settings.site,
-                ...patch,
-                social: { ...settings.site.social, ...(patch.social || {}) }
+                ...safe,
+                social: { ...settings.site.social, ...(safe.social || {}) }
             };
         } else if (section === 'hero') {
-            settings.hero = { ...settings.hero, ...patch };
+            settings.hero = { ...settings.hero, ...safe };
         } else if (section === 'help' || section === 'profile_button' || section === 'help_button') {
-            settings[section] = { ...settings[section], ...patch };
+            settings[section] = { ...settings[section], ...safe };
+        } else if (section === 'pages' || section === 'blocks') {
+            const next = { ...(settings[section] || {}) };
+            safeKeys.forEach((key) => {
+                if (safe[key] == null) delete next[key];
+                else next[key] = safe[key];
+            });
+            settings[section] = next;
         } else {
             return null;
         }
@@ -771,6 +916,12 @@ module.exports = {
             settings[section] = clone(DEFAULT_SETTINGS[section]);
         } else {
             settings = clone(DEFAULT_SETTINGS);
+        }
+        return clone(settings);
+    },
+    resetBlock: (key) => {
+        if (Object.prototype.hasOwnProperty.call(DEFAULT_SETTINGS.blocks, key)) {
+            settings.blocks[key] = clone(DEFAULT_SETTINGS.blocks[key]);
         }
         return clone(settings);
     },

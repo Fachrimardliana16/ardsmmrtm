@@ -49,6 +49,12 @@ function decryptFile(encryptedPath) {
         // Plaintext fallback for legacy files.
         return raw;
     }
+    // Legacy plaintext uploads may predate encryption being enabled.
+    const head = raw.subarray(0, 8);
+    if (head.equals(Buffer.from('%PDF-')) || head.subarray(0, 2).toString() === 'PK' ||
+        head.equals(Buffer.from([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1]))) {
+        return raw;
+    }
     const iv = raw.subarray(0, 12);
     const tag = raw.subarray(12, 28);
     const ciphertext = raw.subarray(28);

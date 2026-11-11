@@ -18,6 +18,10 @@
                     <svg class="nav-caret" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                 </button>
                 <div class="nav-dropdown">
+                    <button type="button" class="dropdown-item dropdown-item--accent" data-open-modal="seafarer-modal">
+                        <span class="dropdown-item__title">Register as a seafarer</span>
+                        <span class="dropdown-item__desc">Free profile · upload certificates · apply</span>
+                    </button>
                     <a href="jobs.html" class="dropdown-item" data-nav-page="jobs">
                         <span class="dropdown-item__title">Open Vacancies</span>
                         <span class="dropdown-item__desc">Active positions from international principals</span>
@@ -84,17 +88,6 @@
             </div>
         </nav>
 
-        <div class="header-actions">
-            <a href="help.html" class="icon-btn" data-nav-page="help" data-header-help data-default-href="help.html" data-default-label="Help and tutorials" aria-label="Help and tutorials" title="Help &amp; tutorials">
-                <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M9.6 9.2a2.5 2.5 0 114.1 1.9c-.9.7-1.7 1.2-1.7 2.3M12 17h.01"/></svg>
-            </a>
-            <a href="profile.html" class="icon-btn" data-nav-page="profile" data-header-profile data-default-href="profile.html" data-default-label="My profile" aria-label="Seafarer profile" title="My profile">
-                <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path stroke-linecap="round" stroke-linejoin="round" d="M4.8 20a7.2 7.2 0 0114.4 0"/></svg>
-            </a>
-            <button type="button" data-open-modal="seafarer-modal" class="btn btn--ghost btn--sm">Seafarer Portal</button>
-            <button type="button" data-open-modal="principal-modal" class="btn btn--primary btn--sm">Hire Crew</button>
-        </div>
-
         <button id="mobile-menu-btn" type="button" class="menu-toggle" aria-expanded="false" aria-controls="mobile-menu" aria-label="Open navigation">
             <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
                 <path id="menu-icon" stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h16"/>
@@ -111,6 +104,7 @@
                 <svg class="nav-caret" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
             </button>
             <div id="mobile-seafarer" class="mobile-sub">
+                <button type="button" class="mobile-sub__cta" data-open-modal="seafarer-modal">Register as a seafarer</button>
                 <a href="jobs.html" data-nav-page="jobs">Open Vacancies</a>
                 <a href="seafarers.html" data-nav-page="seafarers">For Seafarers</a>
                 <a href="training.html" data-nav-page="training">Training &amp; Certification</a>
@@ -143,12 +137,5 @@
             </div>
         </div>
 
-        <a href="profile.html" class="mobile-link" data-nav-page="profile">My profile</a>
-        <a href="help.html" class="mobile-link" data-nav-page="help">Help &amp; tutorials</a>
-
-        <div class="mobile-actions">
-            <button type="button" data-open-modal="seafarer-modal" class="btn btn--ghost btn--block btn--sm">Seafarer Portal</button>
-            <button type="button" data-open-modal="principal-modal" class="btn btn--primary btn--block btn--sm">Hire Crew</button>
-        </div>
     </div>
 </header>
