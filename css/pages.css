@@ -1,0 +1,526 @@
+/* ============================================================
+   Ardson Maritime — Inner / detail pages
+   Banner hero, breadcrumbs, detail layouts, prose, steps, CTA.
+   Load after styles.css on every non-home page.
+   ============================================================ */
+
+/* ---------- Active nav state ---------- */
+.main-nav .nav-link.is-active { color: var(--sea-700); font-weight: 600; }
+.main-nav .nav-group.is-open > button.is-active,
+.main-nav .nav-group > button.is-active { color: var(--sea-700); }
+.mobile-menu .mobile-link.is-active,
+.mobile-menu .mobile-group .mobile-link.is-active { color: var(--sea-600); font-weight: 600; }
+
+/* ---------- Page banner (dark, non-bleed) ---------- */
+.page-hero {
+    position: relative;
+    background: var(--sea-950);
+    color: #fff;
+    padding: 9rem 0 4.5rem;
+    overflow: hidden;
+    isolation: isolate;
+}
+.page-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+        radial-gradient(72% 130% at 88% -12%, rgba(74, 168, 220, 0.20), transparent 60%),
+        radial-gradient(52% 90% at 8% 112%, rgba(15, 76, 120, 0.42), transparent 65%);
+}
+.page-hero::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.18), transparent);
+}
+.page-hero .crumb {
+    max-width: var(--container);
+}
+.page-hero .inner {
+    max-width: var(--container);
+    margin: 0 auto;
+    padding: 0 1.75rem;
+}
+.page-hero .eyebrow { color: var(--sea-400); }
+.page-hero h1 {
+    font-size: clamp(2.1rem, 4.4vw, 3.15rem);
+    letter-spacing: -0.03em;
+    color: #fff;
+    max-width: 24em;
+    margin-top: 0.95rem;
+}
+.page-hero p.lede {
+    margin-top: 1.15rem;
+    max-width: 40rem;
+    font-size: 1.02rem;
+    line-height: 1.75;
+    color: rgba(226, 238, 247, 0.8);
+}
+
+.crumb {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.02em;
+    color: rgba(226, 238, 247, 0.55);
+    margin: 0 auto;
+    padding: 0 1.75rem;
+}
+.crumb a { color: rgba(226, 238, 247, 0.75); transition: color 0.16s ease; }
+.crumb a:hover { color: #fff; }
+.crumb svg { width: 12px; height: 12px; opacity: 0.5; }
+.crumb [aria-current="page"] { color: var(--sea-200); }
+
+/* ---------- Page sections ---------- */
+.page-section { padding: 5rem 0; }
+.page-section--tint { background: var(--sea-50); }
+.page-section--line { border-bottom: 1px solid var(--line); }
+.page-section--dark { background: var(--sea-900); color: #fff; }
+.page-section--dark h2 { color: #fff; }
+.page-section--dark .eyebrow { color: var(--sea-400); }
+
+.page-sec-head {
+    max-width: 44rem;
+    margin-bottom: 2.75rem;
+}
+.page-sec-head p {
+    margin-top: 0.6rem;
+    font-size: 0.97rem;
+    color: var(--ink-soft);
+    line-height: 1.7;
+}
+.page-sec-head.row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+}
+
+/* ---------- Feature cards (seafarers / principals) ---------- */
+.feat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.1rem;
+}
+.feat-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    padding: 1.65rem 1.5rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s var(--ease);
+}
+.feat-card:hover {
+    border-color: var(--sea-200);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-2px);
+}
+.feat-card__icon {
+    width: 42px;
+    height: 42px;
+    border-radius: var(--r-md);
+    background: var(--sea-50);
+    color: var(--sea-600);
+    display: grid;
+    place-items: center;
+    margin-bottom: 1rem;
+}
+.feat-card__icon svg { width: 20px; height: 20px; }
+.feat-card h3 { font-size: 1.05rem; color: var(--sea-950); }
+.feat-card p {
+    margin-top: 0.45rem;
+    font-size: 0.88rem;
+    line-height: 1.65;
+    color: var(--ink-soft);
+}
+
+/* ---------- Numbered process steps ---------- */
+.steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    counter-reset: step;
+}
+.step { position: relative; }
+.step::before {
+    counter-increment: step;
+    content: "0" counter(step);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--sea-400);
+    font-size: 0.85rem;
+    display: block;
+    margin-bottom: 0.7rem;
+}
+.step h3 { font-size: 1.02rem; color: var(--sea-950); }
+.step p {
+    margin-top: 0.4rem;
+    font-size: 0.87rem;
+    line-height: 1.65;
+    color: var(--ink-soft);
+}
+.page-section--dark .step h3 { color: #fff; }
+.page-section--dark .step p { color: rgba(226, 238, 247, 0.75); }
+
+/* ---------- Checklists (document roadmaps) ---------- */
+.checklist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 0.9rem;
+}
+.check-card {
+    display: flex;
+    gap: 0.85rem;
+    align-items: flex-start;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    padding: 1.1rem 1.15rem;
+}
+.check-card svg {
+    width: 20px;
+    height: 20px;
+    color: var(--success);
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+}
+.check-card strong { display: block; font-size: 0.9rem; color: var(--sea-950); font-weight: 600; }
+.check-card span {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    line-height: 1.55;
+}
+
+/* ---------- CTA band ---------- */
+.cta-band {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    background: var(--sea-950);
+    border-radius: var(--r-xl);
+    padding: 2.6rem 2.75rem;
+    color: #fff;
+}
+.cta-band h2 {
+    color: #fff;
+    font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+    letter-spacing: -0.02em;
+}
+.cta-band p {
+    margin-top: 0.55rem;
+    max-width: 34rem;
+    color: rgba(226, 238, 247, 0.72);
+    font-size: 0.92rem;
+    line-height: 1.65;
+}
+.cta-band .cta-band__actions { display: flex; gap: 0.6rem; flex-shrink: 0; flex-wrap: wrap; }
+@media (max-width: 720px) {
+    .cta-band { flex-direction: column; align-items: flex-start; padding: 2rem 1.5rem; }
+}
+
+/* ---------- Job / article detail layout ---------- */
+.detail-wrap {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 2.25rem;
+    align-items: start;
+}
+.detail-main { min-width: 0; }
+.detail-aside {
+    display: grid;
+    gap: 1.1rem;
+    position: sticky;
+    top: 100px;
+}
+@media (max-width: 960px) {
+    .detail-wrap { grid-template-columns: 1fr; }
+    .detail-aside { position: static; }
+}
+
+.quickcard {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    padding: 1.4rem 1.4rem;
+}
+.quickcard h2 {
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 0.9rem;
+}
+.quickcard dl { display: grid; gap: 0.7rem; margin: 0; }
+.quickcard .spec {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+}
+.quickcard .spec dt { color: var(--muted); }
+.quickcard .spec dd { margin: 0; color: var(--sea-950); font-weight: 600; text-align: right; }
+.quickcard .spec dd.cap { text-transform: capitalize; }
+.quickcard .spec dd.pay { font-size: 1.02rem; color: var(--sea-700); }
+
+.apply-card {
+    background: var(--sea-50);
+    border: 1px solid var(--sea-100);
+    border-radius: var(--r-lg);
+    padding: 1.5rem 1.4rem;
+}
+.apply-card h2 { font-size: 1.05rem; color: var(--sea-950); }
+.apply-card p {
+    margin: 0.4rem 0 1.1rem;
+    font-size: 0.83rem;
+    line-height: 1.6;
+    color: var(--ink-soft);
+}
+.apply-card .note {
+    margin-top: 0.7rem;
+    font-size: 0.76rem;
+    color: var(--muted);
+}
+
+/* ---------- Prose (detail body) ---------- */
+.prose { max-width: 40rem; }
+.prose h2 {
+    font-size: 1.35rem;
+    color: var(--sea-950);
+    margin: 2.2rem 0 0.8rem;
+    letter-spacing: -0.01em;
+}
+.prose h2:first-child { margin-top: 0; }
+.prose p {
+    font-size: 0.96rem;
+    line-height: 1.78;
+    color: var(--ink-soft);
+    margin-top: 0.9rem;
+}
+.prose ul {
+    display: grid;
+    gap: 0.5rem;
+    margin-top: 0.9rem;
+}
+.prose ul li {
+    position: relative;
+    padding-left: 1.4rem;
+    font-size: 0.93rem;
+    line-height: 1.65;
+    color: var(--ink-soft);
+}
+.prose ul li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.62em;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--sea-400);
+}
+.prose h3 { font-size: 1.02rem; color: var(--sea-900); margin-top: 1.6rem; }
+.prose .prose-facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1.1rem;
+    margin-top: 1.6rem;
+}
+.prose .prose-fact {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    padding: 1.05rem 1.1rem;
+}
+.prose .prose-fact span {
+    display: block;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+}
+.prose .prose-fact strong {
+    display: block;
+    margin-top: 0.3rem;
+    font-size: 1rem;
+    color: var(--sea-950);
+    font-weight: 600;
+}
+
+/* Article hero media */
+.article-media {
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    margin-top: 2.25rem;
+    border: 1px solid var(--line);
+}
+.article-media img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+.article-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1.25rem;
+    align-items: center;
+    margin-top: 1.4rem;
+    font-size: 0.82rem;
+    color: var(--muted);
+}
+.article-meta .tag {
+    background: var(--sea-50);
+    color: var(--sea-700);
+    border: 1px solid var(--sea-100);
+    padding: 0.18rem 0.55rem;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+/* ---------- Shared heading eyebrow ----------
+   (.eyebrow base lives in styles.css; add slight size lift on dark banners.) */
+.page-hero .eyebrow { color: var(--sea-400); }
+
+/* ---------- Job card action row ---------- */
+.job-card__actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.15rem;
+}
+.job-card__actions > * { flex: 1; }
+
+/* ---------- Article "more reading" links ---------- */
+.quickcard .spec dt a { color: var(--sea-700); font-weight: 500; }
+.quickcard .spec dt a:hover { color: var(--sea-500); }
+.quickcard dl { gap: 0.85rem; }
+
+/* ---------- FAQ accordion (help centre) ---------- */
+.faq-list { display: grid; gap: 0.6rem; max-width: 52rem; }
+.faq-item {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    padding: 0 1.25rem;
+    transition: border-color 0.2s ease;
+}
+.faq-item[open] { border-color: var(--sea-200); }
+.faq-item summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.05rem 0;
+    font-size: 0.93rem;
+    font-weight: 600;
+    color: var(--sea-950);
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after {
+    content: "+";
+    font-size: 1.15rem;
+    font-weight: 400;
+    color: var(--sea-500);
+    line-height: 1;
+    flex-shrink: 0;
+    transition: transform 0.2s var(--ease);
+}
+.faq-item[open] summary::after { transform: rotate(45deg); }
+.faq-item p {
+    margin: 0 0 1.15rem;
+    max-width: 44rem;
+    font-size: 0.9rem;
+    line-height: 1.72;
+    color: var(--ink-soft);
+}
+
+/* ---------- Sitemap ---------- */
+.sitemap-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2rem 2.5rem;
+}
+.sitemap-col h2 {
+    font-size: 0.72rem;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 0.85rem;
+}
+.sitemap-col ul { display: grid; gap: 0.5rem; }
+.sitemap-col li a {
+    font-size: 0.92rem;
+    color: var(--sea-800);
+    transition: color 0.16s ease;
+}
+.sitemap-col li a:hover { color: var(--sea-500); }
+.sitemap-note {
+    margin-top: 0.85rem;
+    font-size: 0.79rem;
+    line-height: 1.6;
+    color: var(--muted);
+}
+
+/* ---------- Seafarer profile ---------- */
+.panel-stack { display: grid; gap: 1.15rem; }
+.profile-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    padding: 1.5rem 1.5rem 1.6rem;
+}
+.profile-card__head {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    margin-bottom: 1.35rem;
+}
+.profile-card__head h2 { font-size: 1.08rem; color: var(--sea-950); }
+.profile-card__head p {
+    margin-top: 0.2rem;
+    font-size: 0.81rem;
+    color: var(--muted);
+    line-height: 1.55;
+}
+.profile-avatar {
+    width: 46px; height: 46px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--sea-50);
+    border: 1px solid var(--sea-100);
+    color: var(--sea-700);
+    font-weight: 600;
+    font-size: 1.05rem;
+}
+.profile-card > h2 { font-size: 1.05rem; color: var(--sea-950); }
+.profile-card > p {
+    margin: 0.35rem 0 1.1rem;
+    font-size: 0.84rem;
+    color: var(--ink-soft);
+    line-height: 1.6;
+}
+.profile-card .form-grid { margin-bottom: 0.9rem; }
+.doc-status { display: grid; gap: 0.65rem; }
+.doc-status li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.86rem;
+    color: var(--ink-soft);
+}
+.doc-status li:last-child { border-bottom: 0; padding-bottom: 0; }

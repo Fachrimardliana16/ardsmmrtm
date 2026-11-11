@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Private build sources and admin surface stay out of the index.
+Disallow: /admin/
+Disallow: /_pages/
+Disallow: /_partials/
+Disallow: /scripts/
+Disallow: /server/
+Disallow: /api/
+Disallow: /pages.json
+Disallow: /*?token=
+
+Sitemap: https://www.ardsonmaritime.com/sitemap.xml

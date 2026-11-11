@@ -1,0 +1,161 @@
+<!-- SEAFARER REGISTRATION MODAL -->
+<div id="seafarer-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="seafarer-modal-title" aria-hidden="true">
+    <div class="modal__panel">
+        <button type="button" data-modal-close="seafarer-modal" class="modal__close" aria-label="Close registration form">
+            <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+
+        <div class="modal__head">
+            <span class="eyebrow">Seafarer portal</span>
+            <h2 id="seafarer-modal-title">Seafarer registration</h2>
+            <p>Create a profile to apply for international sea contracts. Registration is free under MLC 2006.</p>
+        </div>
+
+        <div id="apply-context" class="apply-context">
+            <strong>Applying for:</strong> <span data-apply-label></span>
+        </div>
+
+        <form id="seafarer-form" class="modal__form" novalidate>
+            <div class="form-grid form-grid--2">
+                <div class="field">
+                    <label for="seafarer-name">Full name <span class="req">*</span></label>
+                    <input id="seafarer-name" name="name" type="text" required autocomplete="name" placeholder="As shown in your seaman's book">
+                </div>
+                <div class="field">
+                    <label for="seafarer-email">Email address <span class="req">*</span></label>
+                    <input id="seafarer-email" name="email" type="email" required autocomplete="email" placeholder="name@email.com">
+                </div>
+            </div>
+
+            <div class="form-grid form-grid--2">
+                <div class="field">
+                    <label for="seafarer-phone">Phone / WhatsApp <span class="req">*</span></label>
+                    <input id="seafarer-phone" name="phone" type="tel" required autocomplete="tel" placeholder="+62 812-3456-7890">
+                </div>
+                <div class="field">
+                    <label for="seafarer-rank">Applied rank <span class="req">*</span></label>
+                    <select id="seafarer-rank" name="applied_rank" required>
+                        <option value="">Select a rank</option>
+                        <option value="Master / Captain">Master / Captain</option>
+                        <option value="Chief Officer / 2nd Mate">Chief Officer / 2nd Mate</option>
+                        <option value="Chief Engineer">Chief Engineer</option>
+                        <option value="2nd Engineer / 3rd Engineer">2nd / 3rd Engineer</option>
+                        <option value="Able Seaman (AB) / Bosun">Able Seaman (AB) / Bosun</option>
+                        <option value="Oiler / Fitter">Oiler / Fitter</option>
+                        <option value="Chief Cook / Steward">Chief Cook / Steward</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="seafarer-vessel">Vessel type experience</label>
+                <select id="seafarer-vessel" name="vessel_experience">
+                    <option value="Container">Container vessel</option>
+                    <option value="Oil Tanker">Oil / chemical tanker</option>
+                    <option value="Bulk Carrier">Bulk carrier</option>
+                    <option value="LNG/LPG">LNG / LPG gas carrier</option>
+                    <option value="Offshore">Offshore (AHTS / supply / tug)</option>
+                    <option value="Cruise">Cruise / passenger vessel</option>
+                </select>
+            </div>
+
+            <fieldset style="border:0;padding:0;margin:0">
+                <legend style="font-size:.78rem;font-weight:500;color:var(--ink-soft);margin-bottom:.45rem">Valid certifications</legend>
+                <div class="check-grid">
+                    <label class="check">
+                        <input type="checkbox" name="certifications" value="BST" checked> BST (basic safety)
+                    </label>
+                    <label class="check">
+                        <input type="checkbox" name="certifications" value="Passport & Seaman Book" checked> Passport &amp; seaman's book
+                    </label>
+                    <label class="check">
+                        <input type="checkbox" name="certifications" value="Advanced Tanker CoP"> Advanced tanker (CoP)
+                    </label>
+                    <label class="check">
+                        <input type="checkbox" name="certifications" value="MCU Medical"> MCU medical (fit for sea)
+                    </label>
+                </div>
+            </fieldset>
+
+            <div class="field">
+                <span>CV / sea service document</span>
+                <div id="cv-dropzone" class="dropzone" role="button" tabindex="0" aria-controls="cv-file-input" aria-label="Choose or drop a CV file">
+                    <svg fill="none" stroke="currentColor" stroke-width="1.25" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.9A5 5 0 1115.9 6H16a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                    <span id="cv-file-label" class="dropzone__label">Click to choose a file or drag it here</span>
+                    <span class="dropzone__hint">PDF, DOC, or DOCX — maximum 5MB</span>
+                    <input type="file" id="cv-file-input" name="cv_file" accept=".pdf,.doc,.docx" class="sr-only">
+                </div>
+            </div>
+
+            <label class="consent">
+                <input type="checkbox" required id="consent-check">
+                <span>I consent to Ardson Maritime processing my personal data for crew placement purposes, in line with Indonesia's Personal Data Protection Law.</span>
+            </label>
+
+            <button type="submit" class="btn btn--primary btn--block">Submit registration</button>
+        </form>
+    </div>
+</div>
+
+<!-- PRINCIPAL CREW REQUEST MODAL -->
+<div id="principal-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="principal-modal-title" aria-hidden="true">
+    <div class="modal__panel">
+        <button type="button" data-modal-close="principal-modal" class="modal__close" aria-label="Close crew request form">
+            <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+
+        <div class="modal__head">
+            <span class="eyebrow">Principal / shipowner</span>
+            <h2 id="principal-modal-title">Crew requirement request</h2>
+            <p>Send your crewing specification and our team will prepare a candidate proposal.</p>
+        </div>
+
+        <form id="principal-form" class="modal__form" novalidate>
+            <div class="form-grid form-grid--2">
+                <div class="field">
+                    <label for="principal-company">Company name <span class="req">*</span></label>
+                    <input id="principal-company" name="company_name" type="text" required autocomplete="organization" placeholder="Shipping company name">
+                </div>
+                <div class="field">
+                    <label for="principal-email">Contact email <span class="req">*</span></label>
+                    <input id="principal-email" name="email" type="email" required autocomplete="email" placeholder="crewing@company.com">
+                </div>
+            </div>
+
+            <div class="form-grid form-grid--2">
+                <div class="field">
+                    <label for="principal-vessel">Vessel type <span class="req">*</span></label>
+                    <select id="principal-vessel" name="vessel_type" required>
+                        <option value="Container">Container vessel</option>
+                        <option value="Tanker">Oil / chemical / gas tanker</option>
+                        <option value="Bulk">Bulk carrier</option>
+                        <option value="Offshore">Offshore supply / tug</option>
+                        <option value="Cruise">Cruise / passenger vessel</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="principal-joining">Target joining date <span class="req">*</span></label>
+                    <input id="principal-joining" name="joining_date" type="date" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="principal-ranks">Required ranks and quantity <span class="req">*</span></label>
+                <textarea id="principal-ranks" name="required_ranks" rows="3" required placeholder="e.g. 1 Chief Engineer (MAN B&amp;W), 2 AB, 1 Chief Cook. Embarkation port: Singapore."></textarea>
+            </div>
+
+            <div class="form-grid form-grid--2">
+                <div class="field">
+                    <label for="principal-duration">Contract duration</label>
+                    <input id="principal-duration" name="contract_duration" type="text" placeholder="e.g. 4 months (+/- 1)">
+                </div>
+                <div class="field">
+                    <label for="principal-flag">Flag state</label>
+                    <input id="principal-flag" name="flag_state" type="text" placeholder="e.g. Panama, Liberia">
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn--primary btn--block">Submit request</button>
+        </form>
+    </div>
+</div>

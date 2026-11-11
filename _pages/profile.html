@@ -1,0 +1,148 @@
+        <section class="page-hero">
+            <nav class="crumb" aria-label="Breadcrumb">
+                <a href="index.html">Home</a>
+                <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/></svg>
+                <span aria-current="page">My profile</span>
+            </nav>
+            <div class="inner">
+                <span class="eyebrow">Seafarer portal</span>
+                <h1>Your crewing profile</h1>
+                <p class="lede">
+                    Keep your rank, vessel experience, and certificate status current. A complete
+                    profile is what lets our crewing desk propose you for a contract.
+                </p>
+            </div>
+        </section>
+
+        <section class="page-section">
+            <div class="container">
+                <div class="detail-wrap">
+                    <div class="detail-main">
+
+                        <div class="panel-stack">
+                            <form id="profile-form" class="profile-card" novalidate>
+                                <div class="profile-card__head">
+                                    <div class="profile-avatar" data-profile-initial aria-hidden="true">S</div>
+                                    <div>
+                                        <h2>Personal details</h2>
+                                        <p>Shown only to the Ardson crewing desk and the principals you are proposed to.</p>
+                                    </div>
+                                </div>
+
+                                <div class="form-grid form-grid--2">
+                                    <div class="field">
+                                        <label for="profile-name">Full name</label>
+                                        <input id="profile-name" name="name" autocomplete="name" placeholder="As printed on your passport">
+                                    </div>
+                                    <div class="field">
+                                        <label for="profile-email">Email</label>
+                                        <input id="profile-email" name="email" type="email" autocomplete="email" placeholder="name@email.com">
+                                    </div>
+                                </div>
+                                <div class="form-grid form-grid--2">
+                                    <div class="field">
+                                        <label for="profile-phone">Phone / WhatsApp</label>
+                                        <input id="profile-phone" name="phone" type="tel" autocomplete="tel" placeholder="+62 …">
+                                    </div>
+                                    <div class="field">
+                                        <label for="profile-rank">Applied rank</label>
+                                        <select id="profile-rank" name="applied_rank">
+                                            <option value="">Select a rank</option>
+                                            <option>Master / Captain</option>
+                                            <option>Chief Officer</option>
+                                            <option>2nd Officer</option>
+                                            <option>3rd Officer</option>
+                                            <option>Chief Engineer</option>
+                                            <option>2nd Engineer</option>
+                                            <option>3rd Engineer</option>
+                                            <option>Electrician / ETO</option>
+                                            <option>Bosun</option>
+                                            <option>Able Seaman (AB)</option>
+                                            <option>Oiler / Fitter</option>
+                                            <option>Chief Cook / Steward</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-grid form-grid--2">
+                                    <div class="field">
+                                        <label for="profile-vessel">Vessel experience</label>
+                                        <select id="profile-vessel" name="vessel_experience">
+                                            <option value="">Select a vessel type</option>
+                                            <option>Container</option>
+                                            <option>Oil Tanker</option>
+                                            <option>Chemical Tanker</option>
+                                            <option>LNG / LPG</option>
+                                            <option>Bulk Carrier</option>
+                                            <option>Offshore</option>
+                                            <option>Cruise</option>
+                                            <option>Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="field">
+                                        <label for="profile-sea-service">Sea service (months)</label>
+                                        <input id="profile-sea-service" name="sea_service_months" type="number" min="0" max="480" placeholder="e.g. 48">
+                                    </div>
+                                </div>
+
+                                <fieldset class="perm-fieldset">
+                                    <legend>Certificates held</legend>
+                                    <div class="perm-grid">
+                                        <label class="perm-option"><input type="checkbox" name="cert" value="BST"> <span>Basic Safety Training</span></label>
+                                        <label class="perm-option"><input type="checkbox" name="cert" value="CoC"> <span>Certificate of Competency</span></label>
+                                        <label class="perm-option"><input type="checkbox" name="cert" value="GMDSS"> <span>GMDSS</span></label>
+                                        <label class="perm-option"><input type="checkbox" name="cert" value="Tanker"> <span>Tanker endorsement</span></label>
+                                        <label class="perm-option"><input type="checkbox" name="cert" value="Medical"> <span>Valid medical (MCU)</span></label>
+                                        <label class="perm-option"><input type="checkbox" name="cert" value="Marlins"> <span>Marlins English test</span></label>
+                                    </div>
+                                </fieldset>
+
+                                <div class="inline-form__actions">
+                                    <button type="submit" class="btn btn--primary btn--sm">Save profile</button>
+                                    <a href="jobs.html" class="btn btn--ghost btn--sm">Browse vacancies</a>
+                                </div>
+                            </form>
+
+                            <div class="profile-card">
+                                <h2>Applications in progress</h2>
+                                <p>Vacancies you have applied for. The crewing desk updates each status.</p>
+                                <div class="mini-list" data-profile-applications>
+                                    <div class="mini-item"><span>No applications yet. Browse the vacancy board to start.</span></div>
+                                </div>
+                            </div>
+
+                            <div class="profile-card">
+                                <h2>Document status</h2>
+                                <p>Documents are verified against the principal's flag state requirements.</p>
+                                <ul class="doc-status">
+                                    <li><span>Certificate of Competency</span><span class="badge badge--open"><span class="badge__dot"></span>Verified</span></li>
+                                    <li><span>Seaman's book</span><span class="badge badge--open"><span class="badge__dot"></span>Verified</span></li>
+                                    <li><span>Passport</span><span class="badge badge--open"><span class="badge__dot"></span>Verified</span></li>
+                                    <li><span>Medical (MCU)</span><span class="badge badge--pending"><span class="badge__dot"></span>Expires in 4 months</span></li>
+                                    <li><span>Marlins English</span><span class="badge badge--muted"><span class="badge__dot"></span>Not submitted</span></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <aside class="detail-aside">
+                        <div class="quickcard">
+                            <h2>Profile summary</h2>
+                            <dl>
+                                <div class="spec"><dt>Reference</dt><dd data-profile-ref>—</dd></div>
+                                <div class="spec"><dt>Status</dt><dd data-profile-status>Incomplete</dd></div>
+                                <div class="spec"><dt>Completeness</dt><dd data-profile-complete>0%</dd></div>
+                                <div class="spec"><dt>Last updated</dt><dd data-profile-updated>—</dd></div>
+                            </dl>
+                        </div>
+
+                        <div class="apply-card">
+                            <h2>Need help?</h2>
+                            <p>The help centre walks through registration, uploads, and applying for a vacancy step by step.</p>
+                            <a href="help.html" class="btn btn--primary btn--block btn--sm">Open tutorials</a>
+                            <p class="note">Profiles are stored on this device for the demo. Connect the API to persist them centrally.</p>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+        </section>

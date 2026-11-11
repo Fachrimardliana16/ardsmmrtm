@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#062a44">
+    <title>Admin Console — Ardson Maritime</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <div id="toast-container" class="toast-container" role="region" aria-live="polite" aria-label="Notifications"></div>
+
+    <div class="admin-layout">
+
+        <aside class="admin-sidebar">
+            <div class="admin-sidebar__brand">
+                <span class="brand__mark" aria-hidden="true">A</span>
+                <span class="brand__text">
+                    <span class="brand__name">Ardson Maritime</span>
+                    <span class="brand__sub">Admin Console</span>
+                </span>
+            </div>
+
+            <nav class="admin-nav" aria-label="Admin sections">
+                <div class="admin-nav__section">
+                    <p class="admin-nav__group">Overview</p>
+                    <a href="#" class="admin-nav__link is-active" data-view="dashboard">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 13h6V4H4v9zm0 7h6v-5H4v5zm10 0h6V11h-6v9zm0-16v5h6V4h-6z"/></svg>
+                        <span class="admin-nav__label">Dashboard</span>
+                    </a>
+                </div>
+
+                <div class="admin-nav__section">
+                    <p class="admin-nav__group">Crewing</p>
+                    <a href="#" class="admin-nav__link" data-view="jobs">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4v6l8 4 8-4V7zM4 7l8 4m0 0l8-4m-8 4v8"/></svg>
+                        <span class="admin-nav__label">Vacancies</span>
+                        <span class="admin-nav__count" data-nav-count="jobs">–</span>
+                    </a>
+                    <a href="#" class="admin-nav__link" data-view="seafarers">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4a4 4 0 100 8 4 4 0 000-8zm-7 16a7 7 0 0114 0"/></svg>
+                        <span class="admin-nav__label">Seafarers</span>
+                        <span class="admin-nav__count" data-nav-count="seafarers">–</span>
+                    </a>
+                    <a href="#" class="admin-nav__link" data-view="requests">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                        <span class="admin-nav__label">Crew Requests</span>
+                        <span class="admin-nav__count" data-nav-count="requests">–</span>
+                    </a>
+                </div>
+
+                <div class="admin-nav__section">
+                    <p class="admin-nav__group">Engagement</p>
+                    <a href="#" class="admin-nav__link" data-view="contacts">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l9 6 9-6M4 6h16a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V7a1 1 0 011-1z"/></svg>
+                        <span class="admin-nav__label">Messages</span>
+                        <span class="admin-nav__count admin-nav__count--alert" data-nav-count="unread">–</span>
+                    </a>
+                    <a href="#" class="admin-nav__link" data-view="subscribers">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18v3H3zm0 6h18v3H3zm0 6h12v3H3z"/></svg>
+                        <span class="admin-nav__label">Newsletter</span>
+                        <span class="admin-nav__count" data-nav-count="subscribers">–</span>
+                    </a>
+                </div>
+
+                <div class="admin-nav__section">
+                    <p class="admin-nav__group">Website</p>
+                    <a href="#" class="admin-nav__link" data-view="settings">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3H10a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V10a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>
+                        <span class="admin-nav__label">Site settings</span>
+                    </a>
+                    <a href="#" class="admin-nav__link" data-view="insights">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h9l7 7v7a2 2 0 01-2 2zM14 4v7h7"/></svg>
+                        <span class="admin-nav__label">Maritime Insight</span>
+                        <span class="admin-nav__count" data-nav-count="insights">–</span>
+                    </a>
+                </div>
+
+                <div class="admin-nav__section">
+                    <p class="admin-nav__group">Access</p>
+                    <a href="#" class="admin-nav__link" data-view="users">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16 20v-1a4 4 0 00-4-4H7a4 4 0 00-4 4v1M9.5 7.5a3.5 3.5 0 107 0 3.5 3.5 0 00-7 0zM17 11a3 3 0 100-6M21 20v-1a4 4 0 00-3-3.87"/></svg>
+                        <span class="admin-nav__label">Users</span>
+                        <span class="admin-nav__count" data-nav-count="users">–</span>
+                    </a>
+                    <a href="#" class="admin-nav__link" data-view="roles">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7 4v5c0 4.4-3 8.2-7 9-4-.8-7-4.6-7-9V7l7-4z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9.5 12l2 2 3.5-4"/></svg>
+                        <span class="admin-nav__label">Roles &amp; permissions</span>
+                    </a>
+                </div>
+
+                <div class="admin-nav__section">
+                    <p class="admin-nav__group">System</p>
+                    <a href="#" class="admin-nav__link" data-view="backups">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3z"/><path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 1.7 3.6 3 8 3s8-1.3 8-3V7M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>
+                        <span class="admin-nav__label">Backups</span>
+                    </a>
+                    <a href="#" class="admin-nav__link" data-view="logs">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 4h9a1 1 0 011 1v14a1 1 0 01-1 1H6a1 1 0 01-1-1V7l3-3zM9 4v3H5m3 6h7m-7 4h5"/></svg>
+                        <span class="admin-nav__label">Logs &amp; errors</span>
+                        <span class="admin-nav__count admin-nav__count--alert" data-nav-count="errors">–</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="admin-sidebar__foot">
+                <div class="admin-user" data-admin-user>admin@ardsonmaritime.com</div>
+                <a href="../index.html" class="btn btn--onDark btn--sm btn--block">
+                    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12H3m0 0l4-4m-4 4l4 4m8-11h3a1 1 0 011 1v14a1 1 0 01-1 1h-3"/></svg>
+                    View website
+                </a>
+                <button type="button" class="btn btn--onDark btn--sm btn--block" data-admin-logout>
+                    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                    Sign out
+                </button>
+            </div>
+        </aside>
+
+        <main class="admin-main">
+
+            <!-- Dashboard -->
+            <section data-panel="dashboard">
+                <header class="admin-topbar">
+                    <div>
+                        <h1>Dashboard</h1>
+                        <p>Live overview of vacancies, candidates, and principal activity.</p>
+                    </div>
+                    <div class="admin-topbar__actions">
+                        <button type="button" class="btn btn--ghost btn--sm" data-admin-refresh>Refresh data</button>
+                        <button type="button" class="btn btn--primary btn--sm" data-admin-new-job>New vacancy</button>
+                    </div>
+                </header>
+
+                <div class="metric-grid" data-metric-grid>
+                    <div class="metric">
+                        <div class="metric__label">Open vacancies</div>
+                        <div class="metric__value" data-metric="openJobs">–</div>
+                        <div class="metric__hint" data-metric-hint="totalJobs">– total published</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric__label">Seafarer registrations</div>
+                        <div class="metric__value" data-metric="seafarers">–</div>
+                        <div class="metric__hint">Pending document verification</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric__label">Crew requests</div>
+                        <div class="metric__value" data-metric="crewRequests">–</div>
+                        <div class="metric__hint">Received from principals</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric__label">Unread messages</div>
+                        <div class="metric__value" data-metric="unreadContacts">–</div>
+                        <div class="metric__hint">In the contact inbox</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric__label">Newsletter subscribers</div>
+                        <div class="metric__value" data-metric="subscribers">–</div>
+                        <div class="metric__hint">Vacancy alert list</div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel__head">
+                        <div>
+                            <h2>Recent activity</h2>
+                            <p>Latest registrations and principal crew requests</p>
+                        </div>
+                    </div>
+                    <div class="panel__body">
+                        <div class="metric-grid" style="margin-bottom:0;grid-template-columns:1fr 1fr">
+                            <div>
+                                <div class="metric__label">New seafarers</div>
+                                <div class="mini-list" data-recent="seafarers"></div>
+                            </div>
+                            <div>
+                                <div class="metric__label">Crew requests</div>
+                                <div class="mini-list" data-recent="requests"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Jobs -->
+            <section data-panel="jobs" hidden>
+                <header class="admin-topbar">
+                    <div>
+                        <h1>Vacancies</h1>
+                        <p>Publish, edit, and close crew positions across the fleet.</p>
+                    </div>
+                    <div class="admin-topbar__actions">
+                        <button type="button" class="btn btn--primary btn--sm" data-admin-new-job>New vacancy</button>
+                    </div>
+                </header>
+
+                <div class="toolbar">
+                    <div class="toolbar-search">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M20 20l-3.5-3.5"/></svg>
+                        <input type="search" placeholder="Search by rank, vessel, or principal" data-filter="jobs">
+                    </div>
+                    <select data-filter-select="status" class="field" style="max-width:170px">
+                        <option value="">All statuses</option>
+                        <option value="open">Open</option>
+                        <option value="filled">Filled</option>
+                        <option value="closed">Closed</option>
+                    </select>
+                    <select data-filter-select="category" class="field" style="max-width:170px">
+                        <option value="">All departments</option>
+                        <option value="deck">Deck</option>
+                        <option value="engine">Engine</option>
+                        <option value="hotel">Hotel &amp; Catering</option>
+                    </select>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Position</th>
+                                <th>Vessel</th>
+                                <th>Principal</th>
+                                <th>Salary (USD)</th>
+                                <th>Joining</th>
+                                <th>Status</th>
+                                <th style="text-align:right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody data-table="jobs"></tbody>
+                    </table>
+                    <div class="table-empty" data-table-empty="jobs" hidden>No vacancies match the current filters.</div>
+                </div>
+            </section>
+
+            <!-- Seafarers -->
+            <section data-panel="seafarers" hidden>
+                <header class="admin-topbar">
+                    <div>
+                        <h1>Seafarers</h1>
+                        <p>Candidates who have registered through the public portal.</p>
+                    </div>
+                </header>
+
+                <div class="toolbar">
+                    <div class="toolbar-search">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M20 20l-3.5-3.5"/></svg>
+                        <input type="search" placeholder="Search by name, email, or rank" data-filter="seafarers">
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Reference</th>
+                                <th>Name</th>
+                                <th>Applied rank</th>
+                                <th>Vessel experience</th>
+                                <th>Certifications / Notes</th>
+                                <th>Submitted</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody data-table="seafarers"></tbody>
+                    </table>
+                    <div class="table-empty" data-table-empty="seafarers" hidden>No seafarer registrations yet.</div>
+                </div>
+            </section>
+
+            <!-- Crew requests -->
+            <section data-panel="requests" hidden>
+                <header class="admin-topbar">
+                    <div>
+                        <h1>Crew Requests</h1>
+                        <p>Specifications submitted by principals and ship managers.</p>
+                    </div>
+                </header>
+
+                <div class="toolbar">
+                    <div class="toolbar-search">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M20 20l-3.5-3.5"/></svg>
+                        <input type="search" placeholder="Search by company or vessel type" data-filter="requests">
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Reference</th>
+                                <th>Company</th>
+                                <th>Vessel</th>
+                                <th>Ranks required</th>
+                                <th>Target joining</th>
+                                <th>Received</th>
+                            </tr>
+                        </thead>
+                        <tbody data-table="requests"></tbody>
+                    </table>
+                    <div class="table-empty" data-table-empty="requests" hidden>No crew requests received yet.</div>
+                </div>
+            </section>
+
+            <!-- Contacts -->
+            <section data-panel="contacts" hidden>
+                <header class="admin-topbar">
+                    <div>
+                        <h1>Messages</h1>
+                        <p>Enquiries from the public contact form.</p>
+                    </div>
+                </header>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>From</th>
+                                <th>Email</th>
+                                <th>Message</th>
+                                <th>Received</th>
+                                <th style="text-align:right">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody data-table="contacts"></tbody>
+                    </table>
+                    <div class="table-empty" data-table-empty="contacts" hidden>No messages yet.</div>
+                </div>
+            </section>
+
+            <!-- Subscribers -->
+            <section data-panel="subscribers" hidden>
+                <header class="admin-topbar">
+                    <div>
+                        <h1>Newsletter</h1>
+                        <p>Subscribers receiving vacancy alerts and regulatory updates.</p>
+                    </div>
+                    <div class="admin-topbar__actions">
+                        <button type="button" class="btn btn--ghost btn--sm" data-admin-export>Export list (.csv)</button>
+                    </div>
+                </header>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th style="text-align:right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody data-table="subscribers"></tbody>
+                    </table>
+                    <div class="table-empty" data-table-empty="subscribers" hidden>No subscribers yet.</div>
+                </div>
+            </section>
+
+            <!-- Site settings -->
+            <section data-panel="settings" hidden>
+                <header class="admin-topbar">
+                    <div>
+                        <h1>Site settings</h1>
+                        <p>Brand, contact details, social links, and the home hero. Changes apply to the public site.</p>
+                    </div>
+                    <div class="admin-topbar__actions">
+                        <button type="button" class="btn btn--ghost btn--sm" data-settings-reset="site">Reset site</button>
+                        <button type="button" class="btn btn--ghost btn--sm" data-settings-reset="hero">Reset hero</button>
+                        <button type="button" class="btn btn--ghost btn--sm" data-settings-reset="help">Reset help</button>
+                    </div>
+                </header>
+
+                <div class="settings-tabs" role="tablist" aria-label="Settings sections">
+                    <button type="button" class="settings-tab is-active" data-settings-tab="site" role="tab" aria-selected="true">Website</button>
+                    <button type="button" class="settings-tab" data-settings-tab="hero" role="tab" aria-selected="false">Hero</button>
+                    <button type="button" class="settings-tab" data-settings-tab="help" role="tab" aria-selected="false">Help centre</button>
+                    <button type="button" class="settings-tab" data-settings-tab="buttons" role="tab" aria-selected="false">Header buttons</button>
+                </div>
+
+                <form id="settings-site-form" class="panel" data-settings-form="site">
+                    <div class="panel__head">
+                        <div>
+                            <h2>Identity &amp; contact</h2>
+                            <p>Used in the header, footer, contact page, and structured data.</p>
+                        </div>
+                    </div>
+                    <div class="panel__body">
+                        <div class="form-grid form-grid--2">
+                            <div class="field">
+                                <label for="set-name">Site name</label>
+                                <input id="set-name" name="name" placeholder="Ardson Maritime">
+                            </div>
+                            <div class="field">
+                                <label for="set-tagline">Tagline</label>
+                                <input id="set-tagline" name="tagline" placeholder="Career Center">
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label for="set-description">Site description <span class="req">*</span></label>
+                            <textarea id="set-description" name="description" rows="3" placeholder="Meta description used by search engines"></textarea>
+                            <span class="field__hint">150–160 characters reads best in search results.</span>
+                        </div>
+                        <div class="form-grid form-grid--2">
+                            <div class="field">
+                                <label for="set-favicon">Favicon path or URL</label>
+                                <input id="set-favicon" name="favicon" placeholder="assets/favicon.svg">
+                            </div>
+                            <div class="field">
+                                <label for="set-logo">Logo URL</label>
+                                <input id="set-logo" name="logo" placeholder="Leave blank to use the lettered mark">
+                            </div>
+                        </div>
+                        <div class="form-grid form-grid--2">
+                            <div class="field">
+                                <label for="set-email">Email</label>
+                                <input id="set-email" name="email" type="email" placeholder="ardsonmaritime@outlook.com">
+                            </div>
+                            <div class="field">
+                                <label for="set-phone">Phone (display)</label>
+                                <input id="set-phone" name="phone" placeholder="(+62) 852-1125-4485">
+                            </div>
+                        </div>
+                        <div class="form-grid form-grid--2">
+                            <div class="field">
+                                <label for="set-phone-link">Phone (dialable)</label>
+                                <input id="set-phone-link" name="phone_link" placeholder="+6285211254485">
+                            </div>
+                            <div class="field">
+                                <label for="set-site-url">Canonical site URL</label>
+                                <input id="set-site-url" name="site_url" placeholder="https://www.ardsonmaritime.com">
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label for="set-address">Address</label>
+                            <input id="set-address" name="address" placeholder="Purbalingga, Central Java, Indonesia">
+                        </div>
+                        <div class="form-grid form-grid--3">
+                            <div class="field">
+                                <label for="set-city">City</label>
+                                <input id="set-city" name="city" placeholder="Purbalingga">
+                            </div>
+                            <div class="field">
+                                <label for="set-region">Region</label>
+                                <input id="set-region" name="region" placeholder="Central Java">
+                            </div>
+                            <div class="field">
+                                <label for="set-country">Country</label>
+                                <input id="set-country" name="country" placeholder="Indonesia">
+                            </div>
+                        </div>
+                        <div class="form-grid form-grid--2">
+                            <div class="field">
+                                <label for="set-lat">Latitude</label>
+                                <input id="set-lat" name="latitude" type="number" step="0.0001" placeholder="-7.3058">
+                            </div>
+                            <div class="field">
+                                <label for="set-lng">Longitude</label>
+                                <input id="set-lng" name="longitude" type="number" step="0.0001" placeholder="109.3654">
+                            </div>
+                        </div>
+                        <div class="form-grid form-grid--3">
+                            <div class="field">
+                                <label for="set-facebook">Facebook URL</label>
+                                <input id="set-facebook" name="social.facebook" placeholder="https://facebook.com/…">
+                            </div>
+                            <div class="field">
+                                <label for="set-instagram">Instagram URL</label>
+                                <input id="set-instagram" name="social.instagram" placeholder="https://instagram.com/…">
+                            </div>
+                            <div class="field">
+                                <label for="set-linkedin">LinkedIn URL</label>
+                                <input id="set-linkedin" name="social.linkedin" placeholder="https://linkedin.com/company/…">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn--primary">Save website settings</button>
+                    </div>
+                </form>
+
+                <form id="settings-hero-form" class="panel" data-settings-form="hero" hidden>
+                    <div class="panel__head">
+                        <div>
+                            <h2>Hero slideshow</h2>
+                            <p>Up to five image, video, or text slides. Videos are compressed to WebM + MP4 with a WebP poster. Fallback copy is used if no slides exist.</p>
+                        </div>
+                        <div class="admin-topbar__actions">
+                            <button type="button" class="btn btn--primary btn--sm" data-admin-new-slide>New slide</button>
+                            <button type="submit" class="btn btn--ghost btn--sm">Save playback</button>
+                        </div>
+                    </div>
+
+                    <div class="panel__body">
+                        <div class="form-grid form-grid--3">
+                            <div class="field">
+                                <label for="set-hero-transition">Transition</label>
+                                <select id="set-hero-transition" name="transition">
+                                    <option value="fade">Fade</option>
+                                    <option value="slide">Slide</option>
+                                    <option value="zoom">Slow zoom</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label for="set-hero-autoplay">Autoplay</label>
+                                <select id="set-hero-autoplay" name="autoplay">
+                                    <option value="1">On</option>
+                                    <option value="0">Off</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label for="set-hero-pause">Pause on hover</label>
+                                <select id="set-hero-pause" name="pause_on_hover">
+                                    <option value="1">Yes</option>
+                                    <option value="0">No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-grid form-grid--2">
+                            <div class="field">
+                                <label for="set-hero-show-dots">Show slide dots</label>
+                                <select id="set-hero-show-dots" name="show_dots">
+                                    <option value="1">Yes</option>
+                                    <option value="0">No</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label for="set-hero-show-arrows">Show arrows</label>
+                                <select id="set-hero-show-arrows" name="show_arrows">
+                                    <option value="1">Yes</option>
+                                    <option value="0">No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="slide-list" class="slide-list" data-slide-list></div>
+                        <div class="table-empty" data-slide-empty hidden>No slides yet. The hero uses the fallback copy below.</div>
+
+                        <h3 style="margin-top:2rem">Fallback copy</h3>
+                        <p class="field__hint">Used when there are no slides, or while the API is loading.</p>
+                        <div class="field">
+                            <label for="set-hero-image">Background image URL</label>
+                            <input id="set-hero-image" name="image" placeholder="https://images.unsplash.com/…">
+                        </div>
+                        <div class="field">
+                            <label for="set-hero-eyebrow">Eyebrow</label>
+                            <input id="set-hero-eyebrow" name="eyebrow" placeholder="Indonesian Maritime Manning Agency">
+                        </div>
+                        <div class="form-grid form-grid--2">
+                            <div class="field">
+                                <label for="set-hero-title">Headline (first part)</label>
+                                <input id="set-hero-title" name="title" placeholder="Verified seafarers,">
+                            </div>
+                            <div class="field">
+                                <label for="set-hero-accent">Headline (accent part)</label>
+                                <input id="set-hero-accent" name="title_accent" placeholder="ready for the world's fleets">
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label for="set-hero-lede">Intro paragraph</label>
+                            <textarea id="set-hero-lede" name="lede" rows="4"></textarea>
+                        </div>
+                        <div class="form-grid form-grid--2">
+                            <div class="field">
+                                <label for="set-hero-badge-title">Badge title</label>
+                                <input id="set-hero-badge-title" name="badge_title" placeholder="MLC 2006 compliant">
+                            </div>
+                            <div class="field">
+                                <label for="set-hero-badge-text">Badge text</label>
+                                <input id="set-hero-badge-text" name="badge_text" placeholder="Zero recruitment fees for seafarers">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <form id="settings-help-form" class="panel" data-settings-form="help" hidden>
+                    <div class="panel__head">
+                        <div>
+                            <h2>Help centre</h2>
+                            <p>Intro copy at the top of help.html and the closing contact note. The step-by-step guides stay in the page.</p>
+                        </div>
+                    </div>
+                    <div class="panel__body">
+                        <div class="field">
+                            <label for="set-help-eyebrow">Eyebrow</label>
+                            <input id="set-help-eyebrow" name="eyebrow" placeholder="Help centre">
+                        </div>
+                        <div class="field">
+                            <label for="set-help-title">Page heading</label>
+                            <input id="set-help-title" name="title" placeholder="Step-by-step guides for seafarers and principals">
+                        </div>
+                        <div class="field">
+                            <label for="set-help-lede">Intro paragraph</label>
+                            <textarea id="set-help-lede" name="lede" rows="3"></textarea>
+                        </div>
+                        <div class="field">
+                            <label for="set-help-contact">Closing contact note</label>
+                            <textarea id="set-help-contact" name="contact_note" rows="2"></textarea>
+                            <span class="field__hint">Shown in the "Still stuck?" band at the bottom of help.html.</span>
+                        </div>
+                        <button type="submit" class="btn btn--primary">Save help centre</button>
+                    </div>
+                </form>
+
+                <form id="settings-profile-button-form" class="panel" data-settings-form="profile_button" data-settings-group="buttons" hidden>
+                    <div class="panel__head">
+                        <div>
+                            <h2>Profile button</h2>
+                            <p>The icon in the header that points seafarers to their profile or to registration.</p>
+                        </div>
+                    </div>
+                    <div class="panel__body">
+                        <div class="form-grid form-grid--2">
+                            <div class="field">
+                                <label for="set-profile-enabled">Show in header</label>
+                                <select id="set-profile-enabled" name="enabled">
+                                    <option value="1">Yes</option>
+                                    <option value="0">No</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label for="set-profile-mode">Button action</label>
+                                <select id="set-profile-mode" name="mode">
+                                    <option value="profile">Open profile page</option>
+                                    <option value="modal">Open registration form</option>
+                                    <option value="hidden">Hide the button</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-grid form-grid--2">
+                            <div class="field">
+                                <label for="set-profile-label">Tooltip / aria label</label>
+                                <input id="set-profile-label" name="label" placeholder="My profile">
+                            </div>
+                            <div class="field">
+                                <label for="set-profile-href">Link target</label>
+                                <input id="set-profile-href" name="href" placeholder="profile.html">
+                                <span class="field__hint">Used only when the action is "Open profile page".</span>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn--primary">Save profile button</button>
+                    </div>
+                </form>
+
+                <form id="settings-help-button-form" class="panel" data-settings-form="help_button" data-settings-group="buttons" hidden>
+                    <div class="panel__head">
+                        <div>
+                            <h2>Help button</h2>
+                            <p>The question-mark icon in the header that opens the help centre.</p>
+                        </div>
+                    </div>
+                    <div class="panel__body">
+                        <div class="form-grid form-grid--2">
+                            <div class="field">
+                                <label for="set-help-btn-enabled">Show in header</label>
+                                <select id="set-help-btn-enabled" name="enabled">
+                                    <option value="1">Yes</option>
+                                    <option value="0">No</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label for="set-help-btn-label">Tooltip / aria label</label>
+                                <input id="set-help-btn-label" name="label" placeholder="Help and tutorials">
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label for="set-help-btn-href">Link target</label>
+                            <input id="set-help-btn-href" name="href" placeholder="help.html">
+                        </div>
+                        <button type="submit" class="btn btn--primary">Save help button</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Maritime Insight articles -->
+            <section data-panel="insights" hidden>
+                <header class="admin-topbar">
+                    <div>
+                        <h1>Maritime Insight</h1>
+                        <p>Write and publish articles for seafarers and principals. Changes go live on the site immediately.</p>
+                    </div>
+                    <div class="admin-topbar__actions">
+                        <button type="button" class="btn btn--primary btn--sm" data-admin-new-insight>New article</button>
+                    </div>
+                </header>
+
+                <div class="toolbar">
+                    <div class="toolbar-search">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M20 20l-3.5-3.5"/></svg>
+                        <input type="search" placeholder="Search by title or tag" data-filter="insights">
+                    </div>
+                    <select data-filter-select="insight-status" class="field" style="max-width:170px">
+                        <option value="">All statuses</option>
+                        <option value="published">Published</option>
+                        <option value="draft">Draft</option>
+                    </select>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Tag</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th style="text-align:right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody data-table="insights"></tbody>
+                    </table>
+                    <div class="table-empty" data-table-empty="insights" hidden>No articles yet.</div>
+                </div>
+            </section>
+
+            <!-- Users -->            <section data-panel="users" hidden>
+                <header class="admin-topbar">
+                    <div>
+                        <h1>Users</h1>
+                        <p>Console access for the crewing, content, and operations teams.</p>
+                    </div>
+                    <div class="admin-topbar__actions">
+                        <button type="button" class="btn btn--primary btn--sm" data-admin-new-user>Invite user</button>
+                    </div>
+                </header>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Last sign-in</th>
+                                <th style="text-align:right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody data-table="users"></tbody>
+                    </table>
+                    <div class="table-empty" data-table-empty="users" hidden>No console users yet.</div>
+                </div>
+
+                <form id="user-form" class="panel inline-form" data-user-id="" hidden>
+                    <div class="panel__head">
+                        <div>
+                            <h2 id="user-form-title">Invite a user</h2>
+                            <p>They receive access once the invitation is accepted.</p>
+                        </div>
+                    </div>
+                    <div class="panel__body">
+                        <div class="form-grid form-grid--2">
+                            <div class="field">
+                                <label for="user-name">Full name <span class="req">*</span></label>
+                                <input id="user-name" name="name" required placeholder="e.g. Siti Rahma">
+                            </div>
+                            <div class="field">
+                                <label for="user-email">Email <span class="req">*</span></label>
+                                <input id="user-email" name="email" type="email" required placeholder="name@ardsonmaritime.com">
+                            </div>
+                        </div>
+                        <div class="form-grid form-grid--2">
+                            <div class="field">
+                                <label for="user-role">Role</label>
+                                <select id="user-role" name="role"></select>
+                            </div>
+                            <div class="field">
+                                <label for="user-status">Status</label>
+                                <select id="user-status" name="status">
+                                    <option value="invited">Invited</option>
+                                    <option value="active">Active</option>
+                                    <option value="suspended">Suspended</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="inline-form__actions">
+                            <button type="submit" class="btn btn--primary btn--sm">Save user</button>
+                            <button type="button" class="btn btn--ghost btn--sm" data-user-form-cancel>Cancel</button>
+                        </div>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Roles & permissions -->
+            <section data-panel="roles" hidden>
+                <header class="admin-topbar">
+                    <div>
+                        <h1>Roles &amp; permissions</h1>
+                        <p>Decide which parts of the console each role can open and change.</p>
+                    </div>
+                    <div class="admin-topbar__actions">
+                        <button type="button" class="btn btn--primary btn--sm" data-admin-new-role>New role</button>
+                    </div>
+                </header>
+
+                <div class="role-grid" data-role-grid></div>
+
+                <form id="role-form" class="panel inline-form" data-role-id="" hidden>
+                    <div class="panel__head">
+                        <div>
+                            <h2 id="role-form-title">Create a role</h2>
+                            <p>Permissions apply to every user assigned to this role.</p>
+                        </div>
+                    </div>
+                    <div class="panel__body">
+                        <div class="form-grid form-grid--2">
+                            <div class="field">
+                                <label for="role-name">Role name <span class="req">*</span></label>
+                                <input id="role-name" name="name" required placeholder="e.g. Fleet Coordinator">
+                            </div>
+                            <div class="field">
+                                <label for="role-description">Description</label>
+                                <input id="role-description" name="description" placeholder="What this role is responsible for">
+                            </div>
+                        </div>
+                        <fieldset class="perm-fieldset">
+                            <legend>Permissions</legend>
+                            <div class="perm-grid" data-perm-grid></div>
+                        </fieldset>
+                        <div class="inline-form__actions">
+                            <button type="submit" class="btn btn--primary btn--sm">Save role</button>
+                            <button type="button" class="btn btn--ghost btn--sm" data-role-form-cancel>Cancel</button>
+                        </div>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Backups -->
+            <section data-panel="backups" hidden>
+                <header class="admin-topbar">
+                    <div>
+                        <h1>Backups</h1>
+                        <p>Snapshots of settings, vacancies, candidates, and console users.</p>
+                    </div>
+                    <div class="admin-topbar__actions">
+                        <button type="button" class="btn btn--primary btn--sm" data-admin-create-backup>Create backup</button>
+                    </div>
+                </header>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>File</th>
+                                <th>Contents</th>
+                                <th>Size</th>
+                                <th>Created by</th>
+                                <th>Created</th>
+                                <th style="text-align:right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody data-table="backups"></tbody>
+                    </table>
+                    <div class="table-empty" data-table-empty="backups" hidden>No backups yet.</div>
+                </div>
+            </section>
+
+            <!-- Logs -->
+            <section data-panel="logs" hidden>
+                <header class="admin-topbar">
+                    <div>
+                        <h1>Logs &amp; errors</h1>
+                        <p>Console activity, security events, and system failures.</p>
+                    </div>
+                    <div class="admin-topbar__actions">
+                        <button type="button" class="btn btn--ghost btn--sm" data-admin-clear-logs>Clear shown logs</button>
+                    </div>
+                </header>
+
+                <div class="toolbar">
+                    <div class="log-tabs" role="tablist" aria-label="Log level">
+                        <button type="button" class="log-tab is-active" data-log-level="all" role="tab" aria-selected="true">All <span data-log-count="all">–</span></button>
+                        <button type="button" class="log-tab" data-log-level="info" role="tab" aria-selected="false">Info <span data-log-count="info">–</span></button>
+                        <button type="button" class="log-tab" data-log-level="warning" role="tab" aria-selected="false">Warning <span data-log-count="warning">–</span></button>
+                        <button type="button" class="log-tab" data-log-level="error" role="tab" aria-selected="false">Error <span data-log-count="error">–</span></button>
+                    </div>
+                </div>
+
+                <div class="log-list" data-log-list></div>
+                <div class="table-empty" data-table-empty="logs" hidden>No log entries at this level.</div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Job editor modal -->
+    <div id="job-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="job-modal-title" aria-hidden="true">
+        <div class="modal__panel">
+            <button type="button" class="modal__close" data-modal-close="job-modal" aria-label="Close editor">
+                <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>
+            </button>
+
+            <div class="modal__head">
+                <span class="eyebrow" id="job-modal-eyebrow">New vacancy</span>
+                <h2 id="job-modal-title">Publish a position</h2>
+                <p>Fields marked with an asterisk are required.</p>
+            </div>
+
+            <form id="job-form" class="modal__form" novalidate data-job-id="">
+                <div class="form-grid form-grid--2">
+                    <div class="field">
+                        <label for="job-title">Position title <span class="req">*</span></label>
+                        <input id="job-title" name="title" required placeholder="e.g. Chief Officer">
+                    </div>
+                    <div class="field">
+                        <label for="job-category">Department <span class="req">*</span></label>
+                        <select id="job-category" name="category" required>
+                            <option value="deck">Deck / Nautical</option>
+                            <option value="engine">Engine / Technical</option>
+                            <option value="hotel">Hotel &amp; Catering</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-grid form-grid--2">
+                    <div class="field">
+                        <label for="job-vessel-type">Vessel type <span class="req">*</span></label>
+                        <select id="job-vessel-type" name="vessel_type" required>
+                            <option value="Container">Container</option>
+                            <option value="Tanker">Tanker</option>
+                            <option value="Bulk">Bulk carrier</option>
+                            <option value="LNG">LNG / LPG</option>
+                            <option value="Offshore">Offshore</option>
+                            <option value="Cruise">Cruise / passenger</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="job-vessel-name">Vessel name</label>
+                        <input id="job-vessel-name" name="vessel_name" placeholder="e.g. MV Horizon">
+                    </div>
+                </div>
+
+                <div class="form-grid form-grid--2">
+                    <div class="field">
+                        <label for="job-principal">Principal <span class="req">*</span></label>
+                        <input id="job-principal" name="principal" required placeholder="e.g. Horizon Tankers S.A.">
+                    </div>
+                    <div class="field">
+                        <label for="job-flag">Flag state</label>
+                        <input id="job-flag" name="flag_state" placeholder="e.g. Panama">
+                    </div>
+                </div>
+
+                <div class="form-grid form-grid--2">
+                    <div class="field">
+                        <label for="job-salary-min">Salary minimum (USD)</label>
+                        <input id="job-salary-min" name="salary_min" type="number" min="0" placeholder="e.g. 5000">
+                    </div>
+                    <div class="field">
+                        <label for="job-salary-max">Salary maximum (USD)</label>
+                        <input id="job-salary-max" name="salary_max" type="number" min="0" placeholder="e.g. 6000">
+                    </div>
+                </div>
+
+                <div class="form-grid form-grid--2">
+                    <div class="field">
+                        <label for="job-joining">Target joining date</label>
+                        <input id="job-joining" name="joining_date" type="date">
+                    </div>
+                    <div class="field">
+                        <label for="job-duration">Contract duration</label>
+                        <input id="job-duration" name="contract_duration" placeholder="e.g. 4 months">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="job-status">Status</label>
+                    <select id="job-status" name="status">
+                        <option value="open">Open</option>
+                        <option value="filled">Filled</option>
+                        <option value="closed">Closed</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn--primary btn--block">Save vacancy</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Insight article editor -->
+    <div id="insight-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="insight-modal-title" aria-hidden="true">
+        <div class="modal__panel modal__panel--wide">
+            <button type="button" class="modal__close" data-modal-close="insight-modal" aria-label="Close editor">
+                <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>
+            </button>
+
+            <div class="modal__head">
+                <span class="eyebrow" id="insight-modal-eyebrow">New article</span>
+                <h2 id="insight-modal-title">Write a Maritime Insight article</h2>
+                <p>Body accepts basic HTML — headings, paragraphs, lists, and emphasis.</p>
+            </div>
+
+            <form id="insight-form" class="modal__form" novalidate data-insight-id="">
+                <div class="field">
+                    <label for="insight-title">Title <span class="req">*</span></label>
+                    <input id="insight-title" name="title" required placeholder="e.g. STCW and medical document checklist for 2026">
+                </div>
+
+                <div class="form-grid form-grid--3">
+                    <div class="field">
+                        <label for="insight-slug">Slug</label>
+                        <input id="insight-slug" name="slug" placeholder="auto-generated from title">
+                        <span class="field__hint">Leave blank to derive it from the title.</span>
+                    </div>
+                    <div class="field">
+                        <label for="insight-tag">Category tag</label>
+                        <input id="insight-tag" name="tag" placeholder="Career guide">
+                    </div>
+                    <div class="field">
+                        <label for="insight-date">Publish date</label>
+                        <input id="insight-date" name="date" type="date">
+                    </div>
+                </div>
+
+                <div class="form-grid form-grid--2">
+                    <div class="field">
+                        <label for="insight-read">Reading time</label>
+                        <input id="insight-read" name="read" placeholder="4 min read">
+                    </div>
+                    <div class="field">
+                        <label for="insight-status">Status</label>
+                        <select id="insight-status" name="status">
+                            <option value="draft">Draft</option>
+                            <option value="published">Published</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="insight-image">Cover image URL</label>
+                    <input id="insight-image" name="image" placeholder="https://images.unsplash.com/…">
+                </div>
+
+                <div class="field">
+                    <label for="insight-lede">Standfirst / summary</label>
+                    <textarea id="insight-lede" name="lede" rows="3" placeholder="One or two sentences shown on the listing card and in search results."></textarea>
+                </div>
+
+                <div class="field">
+                    <label for="insight-body">Article body (HTML)</label>
+                    <textarea id="insight-body" name="body" rows="14" placeholder="<h2>Section heading</h2>&#10;<p>Paragraph text…</p>"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn--primary btn--block">Save article</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Hero slide editor -->
+    <div id="slide-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="slide-modal-title" aria-hidden="true">
+        <div class="modal__panel">
+            <button type="button" class="modal__close" data-modal-close="slide-modal" aria-label="Close slide editor">
+                <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>
+            </button>
+
+            <div class="modal__head">
+                <span class="eyebrow" id="slide-modal-eyebrow">New slide</span>
+                <h2 id="slide-modal-title">Hero slide</h2>
+                <p>Images and videos are compressed to WebP / WebM + MP4 on upload.</p>
+            </div>
+
+            <form id="slide-form" class="modal__form" novalidate data-slide-id="">
+                <div class="form-grid form-grid--2">
+                    <div class="field">
+                        <label for="slide-type">Media type</label>
+                        <select id="slide-type" name="type">
+                            <option value="image">Image</option>
+                            <option value="video">Video</option>
+                            <option value="text">Text only</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="slide-duration">Duration (ms)</label>
+                        <input id="slide-duration" name="duration" type="number" min="2000" step="500" value="7000">
+                    </div>
+                </div>
+
+                <!-- Image -->
+                <div class="field" data-slide-media="image">
+                    <label>Image</label>
+                    <div class="dropzone" data-slide-drop="image" tabindex="0">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4-4 3 3 4-4 5 5M4 6h16M4 18h16"/></svg>
+                        <span class="dropzone__label">Drop image or click to upload</span>
+                        <span class="dropzone__hint">JPG, PNG, or WebP — up to 50MB. Compressed to WebP automatically.</span>
+                        <input type="file" class="sr-only" data-slide-file="image" accept="image/*">
+                    </div>
+                    <input id="slide-image" name="image" placeholder="…or paste an image URL">
+                    <div class="slide-preview" data-slide-preview="image" hidden>
+                        <img alt="" loading="lazy">
+                        <button type="button" class="btn btn--ghost btn--sm" data-slide-clear="image">Remove</button>
+                    </div>
+                </div>
+
+                <!-- Video -->
+                <div data-slide-media="video" hidden>
+                    <div class="field">
+                        <label>Video (primary WebM)</label>
+                        <div class="dropzone" data-slide-drop="video" tabindex="0">
+                            <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path stroke-linecap="round" d="M10 9l5 3-5 3z"/></svg>
+                            <span class="dropzone__label">Drop video or click to upload</span>
+                            <span class="dropzone__hint">MP4, MOV, or WebM up to 100MB. Compressed to WebM + MP4 with poster.</span>
+                            <input type="file" class="sr-only" data-slide-file="video" accept="video/*">
+                        </div>
+                        <input id="slide-video" name="video" placeholder="…or paste a video URL">
+                    </div>
+                    <div class="form-grid form-grid--2">
+                        <div class="field">
+                            <label for="slide-video-fallback">MP4 fallback URL</label>
+                            <input id="slide-video-fallback" name="video_fallback" placeholder="Auto-filled by upload">
+                        </div>
+                        <div class="field">
+                            <label for="slide-poster">Poster image URL</label>
+                            <input id="slide-poster" name="poster" placeholder="Auto-filled by upload">
+                        </div>
+                    </div>
+                    <div class="slide-preview" data-slide-preview="video" hidden>
+                        <video muted controls playsinline></video>
+                        <button type="button" class="btn btn--ghost btn--sm" data-slide-clear="video">Remove</button>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="slide-eyebrow">Eyebrow</label>
+                    <input id="slide-eyebrow" name="eyebrow" placeholder="Indonesian Maritime Manning Agency">
+                </div>
+                <div class="form-grid form-grid--2">
+                    <div class="field">
+                        <label for="slide-title">Headline (first part)</label>
+                        <input id="slide-title" name="title" placeholder="Verified seafarers,">
+                    </div>
+                    <div class="field">
+                        <label for="slide-title-accent">Headline (accent)</label>
+                        <input id="slide-title-accent" name="title_accent" placeholder="ready for the world's fleets">
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="slide-lede">Intro paragraph</label>
+                    <textarea id="slide-lede" name="lede" rows="3"></textarea>
+                </div>
+                <div class="form-grid form-grid--2">
+                    <div class="field">
+                        <label for="slide-badge-title">Badge title</label>
+                        <input id="slide-badge-title" name="badge_title" placeholder="MLC 2006 compliant">
+                    </div>
+                    <div class="field">
+                        <label for="slide-badge-text">Badge text</label>
+                        <input id="slide-badge-text" name="badge_text" placeholder="Zero recruitment fees">
+                    </div>
+                </div>
+
+                <p class="field__hint" data-slide-upload-status></p>
+                <button type="submit" class="btn btn--primary btn--block">Save slide</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        window.ARDSON_ADMIN_CONFIG = { apiBase: '/api/v1/admin', login: 'login.html' };
+        var qToken = new URLSearchParams(location.search).get('token');
+        window.ARDSON_ADMIN_TOKEN = sessionStorage.getItem('ardson_admin_token') || qToken;
+        if (qToken && !sessionStorage.getItem('ardson_admin_token')) {
+            sessionStorage.setItem('ardson_admin_token', qToken);
+        }
+        if (!window.ARDSON_ADMIN_TOKEN) {
+            window.location.replace('login.html');
+        }
+        // Remove the token from the URL so it does not linger in history/logs.
+        if (qToken && history.replaceState) {
+            history.replaceState(null, '', location.pathname);
+        }
+    </script>
+    <script src="../js/admin.js" defer></script>
+</body>
+</html>

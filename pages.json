@@ -1,0 +1,137 @@
+[
+    {
+        "slug": "jobs",
+        "page": "jobs",
+        "crumb": "Open vacancies",
+        "title": "Maritime Vacancies — Ardson Maritime Career Center",
+        "desc": "Verified seafarer vacancies from international principals: deck, engine, and hotel ranks across container, tanker, gas, bulk, offshore, and cruise tonnage.",
+        "priority": "0.9",
+        "changefreq": "daily"
+    },
+    {
+        "slug": "job",
+        "page": "jobs",
+        "crumb": "Vacancy detail",
+        "title": "Vacancy Detail — Ardson Maritime Career Center",
+        "desc": "Full details of an open maritime vacancy, including salary, vessel, flag state, contract length, and joining date.",
+        "priority": "0.5",
+        "changefreq": "weekly"
+    },
+    {
+        "slug": "seafarers",
+        "page": "seafarers",
+        "crumb": "For seafarers",
+        "title": "For Seafarers — Ardson Maritime Career Center",
+        "desc": "Register as a seafarer, verify your STCW documents, and get matched to verified international contracts. Free placement under MLC 2006.",
+        "priority": "0.9"
+    },
+    {
+        "slug": "principals",
+        "page": "principals",
+        "crumb": "For principals",
+        "title": "For Principals — Ardson Maritime Crewing Services",
+        "desc": "Crew recruitment for shipowners and ship managers: verified Indonesian officers and ratings, screened documents, and end-to-end mobilisation.",
+        "priority": "0.9"
+    },
+    {
+        "slug": "emergency",
+        "page": "emergency",
+        "crumb": "Emergency replacement",
+        "title": "Emergency Replacement Crew — Ardson Maritime",
+        "desc": "24/7 emergency crew replacement for principals: verified stand-by officers and ratings mobilised inside 72 hours, with documentation and travel handled in parallel."
+    },
+    {
+        "slug": "training",
+        "page": "training",
+        "crumb": "Training",
+        "title": "Training &amp; Certification — Ardson Maritime",
+        "desc": "STCW 2010 refreshers, tanker endorsements, and Marlins English preparation for Indonesian seafarers."
+    },
+    {
+        "slug": "insights",
+        "page": "insights",
+        "crumb": "Maritime Insight",
+        "title": "Maritime Insight — Ardson Maritime Career Center",
+        "desc": "Career guidance, certification checklists, and maritime industry analysis for seafarers and principals.",
+        "priority": "0.8",
+        "changefreq": "weekly"
+    },
+    {
+        "slug": "insight",
+        "page": "insights",
+        "crumb": "Article",
+        "title": "Article — Ardson Maritime Insight",
+        "desc": "Maritime career and certification guidance from the Ardson Maritime crewing team.",
+        "priority": "0.5",
+        "ogType": "article"
+    },
+    {
+        "slug": "about",
+        "page": "about",
+        "crumb": "About",
+        "title": "About Ardson Maritime Career Center",
+        "desc": "Maritime manning agency profile, operating standards, and STCW / MLC 2006 compliance."
+    },
+    {
+        "slug": "contact",
+        "page": "contact",
+        "crumb": "Contact",
+        "title": "Contact — Ardson Maritime Career Center",
+        "desc": "Contact the Ardson Maritime crewing team in Central Java for vacancies, registration, or crew requests."
+    },
+    {
+        "slug": "help",
+        "page": "help",
+        "crumb": "Help",
+        "title": "Help &amp; Tutorials — Ardson Maritime",
+        "desc": "Step-by-step guides for seafarers registering and applying, and for principals submitting crew requests.",
+        "faq": [
+            { "q": "Do seafarers pay a recruitment fee?", "a": "No. Placement is paid by the principal. Under MLC 2006, no manning agency may charge a seafarer for recruitment or placement." },
+            { "q": "How long does document verification take?", "a": "Two working days for a complete document set. Missing certificates are the most common reason it takes longer." },
+            { "q": "What file types can I upload?", "a": "PDF, DOC, or DOCX up to 5MB. Scanned images should be converted to PDF before upload." },
+            { "q": "Can I apply for more than one vacancy?", "a": "Yes. One profile covers every application and does not close other applications." }
+        ]
+    },
+    {
+        "slug": "profile",
+        "page": "profile",
+        "crumb": "My profile",
+        "title": "Seafarer Profile — Ardson Maritime Career Center",
+        "desc": "Keep your rank, vessel experience, and certificate status current so the crewing desk can propose you for a contract.",
+        "noindex": true
+    },
+    {
+        "slug": "sitemap",
+        "page": "sitemap",
+        "crumb": "Sitemap",
+        "title": "Sitemap — Ardson Maritime Career Center",
+        "desc": "Index of every public page on the Ardson Maritime site."
+    },
+    {
+        "slug": "privacy",
+        "page": "legal",
+        "crumb": "Privacy policy",
+        "title": "Privacy Policy — Ardson Maritime",
+        "desc": "How Ardson Maritime collects, uses, and protects personal data under Indonesia's Personal Data Protection Law.",
+        "priority": "0.3",
+        "changefreq": "yearly"
+    },
+    {
+        "slug": "terms",
+        "page": "legal",
+        "crumb": "Terms of service",
+        "title": "Terms of Service — Ardson Maritime",
+        "desc": "Terms applying to seafarers, principals, and visitors using the Ardson Maritime site and recruitment services.",
+        "priority": "0.3",
+        "changefreq": "yearly"
+    },
+    {
+        "slug": "mlc-compliance",
+        "page": "legal",
+        "crumb": "MLC compliance",
+        "title": "MLC Compliance — Ardson Maritime",
+        "desc": "How the Maritime Labour Convention 2006 is applied to every Ardson Maritime placement, including the zero-fee policy.",
+        "priority": "0.4",
+        "changefreq": "yearly"
+    }
+]

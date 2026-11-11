@@ -1,0 +1,154 @@
+<header id="site-header" class="site-header">
+    <div class="container header-inner">
+
+        <a href="index.html" class="brand" aria-label="Ardson Maritime Career Center">
+            <span class="brand__mark" aria-hidden="true" data-site-mark>A</span>
+            <span class="brand__text">
+                <span class="brand__name" data-site-name>Ardson Maritime</span>
+                <span class="brand__sub" data-site-tagline>Career Center</span>
+            </span>
+        </a>
+
+        <nav class="main-nav" aria-label="Primary">
+            <a href="index.html" class="nav-link" data-nav-page="home">Home</a>
+
+            <div class="nav-group">
+                <button type="button" data-dropdown-toggle aria-expanded="false" aria-haspopup="true">
+                    Seafarers
+                    <svg class="nav-caret" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div class="nav-dropdown">
+                    <a href="jobs.html" class="dropdown-item" data-nav-page="jobs">
+                        <span class="dropdown-item__title">Open Vacancies</span>
+                        <span class="dropdown-item__desc">Active positions from international principals</span>
+                    </a>
+                    <a href="seafarers.html" class="dropdown-item" data-nav-page="seafarers">
+                        <span class="dropdown-item__title">For Seafarers</span>
+                        <span class="dropdown-item__desc">Registration, documents, and career path</span>
+                    </a>
+                    <a href="training.html" class="dropdown-item" data-nav-page="training">
+                        <span class="dropdown-item__title">Training &amp; Certification</span>
+                        <span class="dropdown-item__desc">STCW 2010 and Marlins test preparation</span>
+                    </a>
+                    <a href="insights.html" class="dropdown-item" data-nav-page="insights">
+                        <span class="dropdown-item__title">Maritime Insight</span>
+                        <span class="dropdown-item__desc">Documents, contracts, and career guidance</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="nav-group">
+                <button type="button" data-dropdown-toggle aria-expanded="false" aria-haspopup="true">
+                    Principals
+                    <svg class="nav-caret" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div class="nav-dropdown">
+                    <a href="principals.html" class="dropdown-item" data-nav-page="principals">
+                        <span class="dropdown-item__title">Recruitment Services</span>
+                        <span class="dropdown-item__desc">Officers and ratings for your fleet</span>
+                    </a>
+                    <a href="about.html#standards" class="dropdown-item" data-nav-page="about">
+                        <span class="dropdown-item__title">Verification &amp; Standards</span>
+                        <span class="dropdown-item__desc">STCW, medical, and MLC 2006 checks</span>
+                    </a>
+                    <a href="emergency.html" class="dropdown-item" data-nav-page="emergency">
+                        <span class="dropdown-item__title">Emergency Replacement</span>
+                        <span class="dropdown-item__desc">24/7 relief crew mobilised inside 72 hours</span>
+                    </a>
+                    <button type="button" class="dropdown-item" data-open-modal="principal-modal">
+                        <span class="dropdown-item__title">Submit Crew Request</span>
+                        <span class="dropdown-item__desc">Send your crewing specification</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="nav-group">
+                <button type="button" data-dropdown-toggle aria-expanded="false" aria-haspopup="true">
+                    Company
+                    <svg class="nav-caret" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div class="nav-dropdown">
+                    <a href="about.html" class="dropdown-item" data-nav-page="about">
+                        <span class="dropdown-item__title">About Ardson</span>
+                        <span class="dropdown-item__desc">Agency profile and licensing</span>
+                    </a>
+                    <a href="insights.html" class="dropdown-item" data-nav-page="insights">
+                        <span class="dropdown-item__title">Maritime Insight</span>
+                        <span class="dropdown-item__desc">Maritime industry updates and analysis</span>
+                    </a>
+                    <a href="contact.html" class="dropdown-item" data-nav-page="contact">
+                        <span class="dropdown-item__title">Contact</span>
+                        <span class="dropdown-item__desc">Office location and direct channels</span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="header-actions">
+            <a href="help.html" class="icon-btn" data-nav-page="help" data-header-help data-default-href="help.html" data-default-label="Help and tutorials" aria-label="Help and tutorials" title="Help &amp; tutorials">
+                <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M9.6 9.2a2.5 2.5 0 114.1 1.9c-.9.7-1.7 1.2-1.7 2.3M12 17h.01"/></svg>
+            </a>
+            <a href="profile.html" class="icon-btn" data-nav-page="profile" data-header-profile data-default-href="profile.html" data-default-label="My profile" aria-label="Seafarer profile" title="My profile">
+                <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path stroke-linecap="round" stroke-linejoin="round" d="M4.8 20a7.2 7.2 0 0114.4 0"/></svg>
+            </a>
+            <button type="button" data-open-modal="seafarer-modal" class="btn btn--ghost btn--sm">Seafarer Portal</button>
+            <button type="button" data-open-modal="principal-modal" class="btn btn--primary btn--sm">Hire Crew</button>
+        </div>
+
+        <button id="mobile-menu-btn" type="button" class="menu-toggle" aria-expanded="false" aria-controls="mobile-menu" aria-label="Open navigation">
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                <path id="menu-icon" stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h16"/>
+            </svg>
+        </button>
+    </div>
+
+    <div id="mobile-menu" class="mobile-menu">
+        <a href="index.html" class="mobile-link" data-nav-page="home">Home</a>
+
+        <div class="mobile-group">
+            <button type="button" data-accordion="mobile-seafarer" aria-expanded="false">
+                Seafarers
+                <svg class="nav-caret" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div id="mobile-seafarer" class="mobile-sub">
+                <a href="jobs.html" data-nav-page="jobs">Open Vacancies</a>
+                <a href="seafarers.html" data-nav-page="seafarers">For Seafarers</a>
+                <a href="training.html" data-nav-page="training">Training &amp; Certification</a>
+                <a href="insights.html" data-nav-page="insights">Maritime Insight</a>
+            </div>
+        </div>
+
+        <div class="mobile-group">
+            <button type="button" data-accordion="mobile-principal" aria-expanded="false">
+                Principals
+                <svg class="nav-caret" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div id="mobile-principal" class="mobile-sub">
+                <a href="principals.html" data-nav-page="principals">Recruitment Services</a>
+                <a href="about.html#standards" data-nav-page="about">Verification &amp; Standards</a>
+                <a href="emergency.html" data-nav-page="emergency">Emergency Replacement</a>
+                <button type="button" data-open-modal="principal-modal">Submit Crew Request</button>
+            </div>
+        </div>
+
+        <div class="mobile-group">
+            <button type="button" data-accordion="mobile-company" aria-expanded="false">
+                Company
+                <svg class="nav-caret" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div id="mobile-company" class="mobile-sub">
+                <a href="about.html" data-nav-page="about">About Ardson</a>
+                <a href="insights.html" data-nav-page="insights">Maritime Insight</a>
+                <a href="contact.html" data-nav-page="contact">Contact</a>
+            </div>
+        </div>
+
+        <a href="profile.html" class="mobile-link" data-nav-page="profile">My profile</a>
+        <a href="help.html" class="mobile-link" data-nav-page="help">Help &amp; tutorials</a>
+
+        <div class="mobile-actions">
+            <button type="button" data-open-modal="seafarer-modal" class="btn btn--ghost btn--block btn--sm">Seafarer Portal</button>
+            <button type="button" data-open-modal="principal-modal" class="btn btn--primary btn--block btn--sm">Hire Crew</button>
+        </div>
+    </div>
+</header>

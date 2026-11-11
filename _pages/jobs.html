@@ -1,0 +1,94 @@
+        <section class="page-hero">
+            <nav class="crumb" aria-label="Breadcrumb">
+                <a href="index.html">Home</a>
+                <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/></svg>
+                <span aria-current="page">Vacancies</span>
+            </nav>
+            <div class="inner">
+                <span class="eyebrow">Live openings</span>
+                <h1>Current maritime vacancies</h1>
+                <p class="lede">
+                    Verified contracts from international principals across container, tanker, bulk,
+                    offshore, and cruise tonnage. Every listing is screened by our crewing team and free
+                    for seafarers under MLC 2006.
+                </p>
+            </div>
+        </section>
+
+        <section class="page-section">
+            <div class="container">
+                <div class="job-toolbar" id="job-tabs" role="tablist" aria-label="Filter vacancies by department">
+                    <button type="button" class="tab-btn is-active" data-tab="all" role="tab" aria-selected="true">All ranks</button>
+                    <button type="button" class="tab-btn" data-tab="deck" role="tab" aria-selected="false">Deck / Nautical</button>
+                    <button type="button" class="tab-btn" data-tab="engine" role="tab" aria-selected="false">Engine / Technical</button>
+                    <button type="button" class="tab-btn" data-tab="hotel" role="tab" aria-selected="false">Hotel &amp; Catering</button>
+                    <span class="job-count"><strong id="job-count-visible">0</strong> positions</span>
+                </div>
+
+                <div id="job-cards-container" class="jobs-grid">
+                    <!-- Rendered by js/app.js -->
+                </div>
+
+                <div id="jobs-loading" class="jobs-skeleton" aria-hidden="true">
+                    <div></div><div></div><div></div>
+                </div>
+
+                <div id="jobs-empty" class="empty-state">
+                    <svg fill="none" stroke="currentColor" stroke-width="1.25" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M20 20l-3.5-3.5"/></svg>
+                    <h3>No vacancies in this department right now</h3>
+                    <p>Register your profile and our crewing team will contact you when a matching position opens.</p>
+                    <button type="button" data-open-modal="seafarer-modal" class="btn btn--primary btn--sm">Register profile</button>
+                </div>
+
+                <div class="jobs-foot">
+                    <button type="button" data-open-modal="seafarer-modal" class="link-arrow">
+                        Don't see your rank? Register for direct matching
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="page-section page-section--tint page-section--line">
+            <div class="container">
+                <div class="page-sec-head">
+                    <span class="eyebrow">How it works</span>
+                    <h2>From application to joining</h2>
+                    <p>Four steps, no fees, and a named crewing coordinator from the first message to the flight.</p>
+                </div>
+
+                <div class="steps">
+                    <div class="step reveal">
+                        <h3>Register your profile</h3>
+                        <p>Submit your rank, vessel experience, and certificates. Upload your CV and sea service documents.</p>
+                    </div>
+                    <div class="step reveal">
+                        <h3>Document verification</h3>
+                        <p>We authenticate certificates, seaman's book, medical, and check the flag endorsements the principal needs.</p>
+                    </div>
+                    <div class="step reveal">
+                        <h3>Principal interview</h3>
+                        <p>Shortlisted candidates sit a technical and Marlins English interview with the ship manager.</p>
+                    </div>
+                    <div class="step reveal">
+                        <h3>Contract and joining</h3>
+                        <p>MLC 2006 contract, visa, flag endorsement, and ticket are coordinated before your joining date.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="page-section">
+            <div class="container">
+                <div class="cta-band">
+                    <div>
+                        <h2>Not seeing your rank?</h2>
+                        <p>Send your profile anyway. We match registered seafarers to new orders before they are advertised.</p>
+                    </div>
+                    <div class="cta-band__actions">
+                        <button type="button" data-open-modal="seafarer-modal" class="btn btn--white">Register profile</button>
+                        <a href="contact.html" class="btn btn--onDark">Contact crewing</a>
+                    </div>
+                </div>
+            </div>
+        </section>

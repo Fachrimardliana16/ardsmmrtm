@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Ardson Maritime">
+    <defs>
+        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#0f4c78"/>
+            <stop offset="1" stop-color="#062a44"/>
+        </linearGradient>
+    </defs>
+    <rect width="64" height="64" rx="13" fill="url(#g)"/>
+    <path d="M32 13 L48 48 H40.2 L37.1 40.6 H26.9 L23.8 48 H16 Z M32 26.4 L28.6 34.4 H35.4 Z" fill="#eef6fb"/>
+    <path d="M12 52.5c3 2 6 2 9 0s6-2 9 0 6 2 9 0 6-2 9 0" fill="none" stroke="#6cc0e8" stroke-width="2.6" stroke-linecap="round"/>
+</svg>

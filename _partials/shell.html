@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{DESC}}">
+    <meta name="theme-color" content="#062a44">
+    <meta name="robots" content="{{ROBOTS}}">
+    <title>{{TITLE}}</title>
+
+    <link rel="canonical" href="{{CANONICAL}}">
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" data-site-favicon>
+    <link rel="apple-touch-icon" href="assets/favicon.svg">
+    <link rel="sitemap" type="application/xml" href="sitemap.xml">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="{{OG_TYPE}}">
+    <meta property="og:site_name" content="Ardson Maritime Career Center">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:title" content="{{TITLE}}">
+    <meta property="og:description" content="{{DESC}}">
+    <meta property="og:url" content="{{CANONICAL}}">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=1200&h=630">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{TITLE}}">
+    <meta name="twitter:description" content="{{DESC}}">
+    <meta name="twitter:image" content="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=1200&h=630">
+
+    <!-- Geo / local discovery -->
+    <meta name="geo.region" content="ID-JT">
+    <meta name="geo.placename" content="Purbalingga, Central Java">
+    <meta name="geo.position" content="-7.3058;109.3654">
+    <meta name="ICBM" content="-7.3058, 109.3654">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://images.unsplash.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/pages.css">
+
+    <script type="application/ld+json">{{JSONLD}}</script>
+
+    <!-- Google Analytics 4 — measurement ID injected by build (GA4_ID in pages.json / env).
+         Disabled when placeholder is left as-is. -->
+    {{GA4_SNIPPET}}
+</head>
+<body data-page="{{PAGE}}">
+
+    <a href="#main" class="skip-link">Skip to content</a>
+
+    <div id="toast-container" class="toast-container" role="region" aria-live="polite" aria-label="Notifications"></div>
+
+    {{HEADER}}
+
+    <main id="main">
+{{MAIN}}
+    </main>
+
+    {{FOOTER}}
+
+    {{MODALS}}
+
+    <script>window.ARDSON_CONFIG = { apiBase: '/api/v1' };</script>
+    <script src="js/site.js" defer></script>
+    <script src="js/pages.js" defer></script>
+    <script src="js/app.js" defer></script>
+</body>
+</html>
