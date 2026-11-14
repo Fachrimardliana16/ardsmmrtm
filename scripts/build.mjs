@@ -15,11 +15,27 @@
  * Usage (from repo root):  node scripts/build.mjs
  */
 import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (rel) => readFileSync(join(root, rel), 'utf8');
+
+const ASSET_FILES = [
+    'css/styles.css',
+    'css/pages.css',
+    'css/admin.css',
+    'js/sanitize.js',
+    'js/site.js',
+    'js/pages.js',
+    'js/app.js',
+    'js/admin.js'
+];
+const assetVersion = createHash('sha256')
+    .update(ASSET_FILES.map(read).join('\0'))
+    .digest('hex')
+    .slice(0, 10);
 
 const SITE_URL = 'https://www.ardsonmaritime.com';
 const SITE_NAME = 'Ardson Maritime Career Center';
@@ -143,6 +159,12 @@ const built = [];
 for (const page of pages) {
     const main = read(join('_pages', page.slug + '.html')).trimEnd();
     const canonical = SITE_URL + '/' + (page.slug === 'index' ? '' : page.slug);
+    const preload = page.preload
+        ? `<link rel="preload" as="image" fetchpriority="high" href="${page.preload}"`
+            + (page.preloadSrcset ? ` imagesrcset="${page.preloadSrcset}"` : '')
+            + (page.preloadSizes ? ` imagesizes="${page.preloadSizes}"` : '')
+            + '>'
+        : '';
 
     const html = shell
         .replaceAll('{{DESC}}', page.desc)
@@ -151,7 +173,9 @@ for (const page of pages) {
         .replaceAll('{{CANONICAL}}', canonical)
         .replaceAll('{{OG_TYPE}}', page.ogType || 'website')
         .replaceAll('{{ROBOTS}}', page.noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large')
+        .replaceAll('{{PRELOAD}}', preload)
         .replaceAll('{{JSONLD}}', jsonLd(page))
+        .replaceAll('{{ASSET_VERSION}}', assetVersion)
         .replaceAll('{{GA4_SNIPPET}}', GA4_SNIPPET)
         .replaceAll('{{HEADER}}', header)
         .replaceAll('{{MAIN}}', main)
@@ -160,6 +184,16 @@ for (const page of pages) {
 
     writeFileSync(join(root, page.slug + '.html'), html + '\n');
     built.push(page.slug + '.html');
+}
+
+/* Hand-maintained pages are not built from _partials, but their css/js
+   references still need the same cache-busting version. */
+for (const rel of ['index.html', 'admin/index.html', 'admin/login.html']) {
+    const html = read(rel).replace(
+        /\b(href|src)="((?:\.\.\/)?(?:css|js)\/[^"?]+)(?:\?v=[^"]*)?"/g,
+        (_match, attr, url) => `${attr}="${url}?v=${assetVersion}"`
+    );
+    writeFileSync(join(root, rel), html);
 }
 
 /* ---------- sitemap.xml ---------- */

@@ -6,3 +6,10 @@ node_modules/
 !.env.example
 *.log
 server/uploads/cv/
+api/config.php
+api/storage/*
+!api/storage/.htaccess
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+.tmp-mysql*

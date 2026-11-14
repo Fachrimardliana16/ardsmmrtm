@@ -1837,6 +1837,65 @@
         setSlideUploadStatus('', '');
     }
 
+    const HERO_MAX_DIMENSION = 2400;
+    const HERO_OPTIMIZE_BYTES = 1.5 * 1024 * 1024;
+
+    function canvasToBlob(canvas, type, quality) {
+        return new Promise((resolve) => canvas.toBlob(resolve, type, quality));
+    }
+
+    /**
+     * Shrink hero images in the browser before upload. The server still
+     * produces the final WebP derivatives; this saves admin bandwidth.
+     * Animated GIF/SVG, unsupported formats, or already-small files are
+     * uploaded unchanged.
+     */
+    async function optimizeHeroImage(file) {
+        if (!file.type.startsWith('image/') || file.type === 'image/svg+xml' || file.type === 'image/gif') {
+            return file;
+        }
+
+        let bitmap;
+        try {
+            bitmap = await createImageBitmap(file);
+        } catch (_e) {
+            return file;
+        }
+
+        try {
+            const scale = Math.min(1, HERO_MAX_DIMENSION / Math.max(bitmap.width, bitmap.height));
+            if (scale === 1 && file.size <= HERO_OPTIMIZE_BYTES) return file;
+
+            const width = Math.max(1, Math.round(bitmap.width * scale));
+            const height = Math.max(1, Math.round(bitmap.height * scale));
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return file;
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(bitmap, 0, 0, width, height);
+
+            let blob = await canvasToBlob(canvas, 'image/webp', 0.9);
+            if (!blob) {
+                // Browsers without WebP encoding fall back to JPEG. Hero
+                // photos are opaque, so a white matte is safe here.
+                ctx.globalCompositeOperation = 'destination-over';
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, width, height);
+                blob = await canvasToBlob(canvas, 'image/jpeg', 0.9);
+            }
+            if (!blob || blob.size >= file.size) return file;
+
+            const ext = blob.type === 'image/webp' ? '.webp' : '.jpg';
+            const name = String(file.name || 'hero').replace(/\.[^.]+$/, '') + ext;
+            return new File([blob], name, { type: blob.type, lastModified: Date.now() });
+        } finally {
+            if (typeof bitmap.close === 'function') bitmap.close();
+        }
+    }
+
     async function uploadSlideMedia(file) {
         setSlideUploadStatus('Uploading and compressing…', 'info');
         const body = new FormData();
@@ -1873,7 +1932,14 @@
         if (kind === 'video' && !file.type.startsWith('video/')) {
             return setSlideUploadStatus('Choose a video file.', 'error');
         }
-        const media = await uploadSlideMedia(file);
+
+        let upload = file;
+        if (kind === 'image') {
+            setSlideUploadStatus('Optimizing image…', 'info');
+            upload = await optimizeHeroImage(file);
+        }
+
+        const media = await uploadSlideMedia(upload);
         if (!media) return;
         if (kind === 'image') {
             $('#slide-image').value = media.url;

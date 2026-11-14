@@ -143,7 +143,6 @@
         if (site.name) {
             const footerName = [site.name, site.tagline].filter(Boolean).join(' ');
             setText('[data-site-footer-name]', footerName);
-            setAttr('.brand', 'aria-label', footerName);
         }
 
         if (site.description) {
@@ -272,8 +271,13 @@
         if (img && hero.image) {
             const src = safeUrl(hero.image, '');
             if (src) {
+                const srcset = heroSrcset(src);
                 img.setAttribute('src', src);
-                img.setAttribute('srcset', src);
+                if (srcset) {
+                    img.setAttribute('srcset', srcset);
+                    img.setAttribute('sizes', '100vw');
+                }
+                img.setAttribute('fetchpriority', 'high');
             }
         }
         setText('[data-hero-eyebrow]', hero.eyebrow);
@@ -306,8 +310,55 @@
         }
     }
 
-    /** Build one slide element. Returns a container ready to mount. */
-    function buildSlide(slide) {
+    const HERO_WIDTHS = [480, 768, 1080, 1200, 1600, 2000, 2400];
+
+    /**
+     * Build a width-descriptor srcset. Unsplash honours ?w=, so mobile
+     * downloads a 480-1200px image instead of the 2400px desktop master.
+     */
+    function unsplashSrcset(src, widths, quality) {
+        try {
+            const url = new URL(src, window.location.href);
+            if (url.hostname !== 'images.unsplash.com') return '';
+            return widths.map((width) => {
+                const candidate = new URL(url.href);
+                candidate.searchParams.set('q', quality);
+                candidate.searchParams.set('w', String(width));
+                return candidate.href + ' ' + width + 'w';
+            }).join(', ');
+        } catch (_e) {
+            return '';
+        }
+    }
+
+    function heroSrcset(src) {
+        const unsplash = unsplashSrcset(src, HERO_WIDTHS, '80');
+        if (unsplash) return unsplash;
+        try {
+            const url = new URL(src, window.location.href);
+            if (/\.webp$/i.test(url.pathname) && !/-1200\.webp$/i.test(url.pathname)) {
+                return src.replace(/\.webp(\?.*)?$/i, '-1200.webp') + ' 1200w, ' + src + ' 2400w';
+            }
+        } catch (_e) {
+            // A malformed image URL falls back to src-only loading.
+        }
+        return '';
+    }
+
+    /** Non-active slides keep their URL in data attributes so they do not load early. */
+    function hydrateHeroImage(img) {
+        if (!img) return;
+        const src = img.getAttribute('data-hero-src');
+        if (!src || img.getAttribute('src')) return;
+        const srcset = img.getAttribute('data-hero-srcset');
+        if (srcset) {
+            img.setAttribute('srcset', srcset);
+            img.setAttribute('sizes', img.getAttribute('data-hero-sizes') || '100vw');
+        }
+        img.setAttribute('src', src);
+    }
+
+    function buildSlide(slide, index) {
         const el = document.createElement('div');
         el.className = 'hero-slide hero-slide--' + (slide.type || 'image');
         el.setAttribute('data-slide-type', slide.type || 'image');
@@ -342,16 +393,21 @@
             if (slide.image) {
                 const src = safeUrl(slide.image, '');
                 if (src) {
-                    img.setAttribute('src', src);
-                    if (src.includes('.webp')) {
-                        img.setAttribute('srcset', src.replace(/\.webp$/, '-1200.webp') + ' 1200w, ' + src + ' 2400w');
-                        img.setAttribute('sizes', '100vw');
+                    img.setAttribute('data-hero-src', src);
+                    const srcset = heroSrcset(src);
+                    if (srcset) {
+                        img.setAttribute('data-hero-srcset', srcset);
+                        img.setAttribute('data-hero-sizes', '100vw');
+                    }
+                    if (index === 0) {
+                        hydrateHeroImage(img);
                     }
                 }
             }
             img.setAttribute('alt', '');
-            img.setAttribute('loading', 'eager');
-            img.setAttribute('fetchpriority', 'high');
+            img.setAttribute('loading', index === 0 ? 'eager' : 'lazy');
+            img.setAttribute('fetchpriority', index === 0 ? 'high' : 'low');
+            img.setAttribute('decoding', 'async');
             el.appendChild(img);
         }
 
@@ -373,7 +429,7 @@
         // Wipe the static image placeholder before inserting live slides.
         bg.innerHTML = '';
 
-        slides.forEach((slide) => bg.appendChild(buildSlide(slide)));
+        slides.forEach((slide, index) => bg.appendChild(buildSlide(slide, index)));
 
         const dots = $('[data-hero-dots]', root);
         if (dots) {
@@ -467,6 +523,8 @@
             const slide = this.slides[this.current];
 
             const nodes = $$('.hero-slide', this.bg);
+            const activeNode = nodes[this.current];
+            if (activeNode) hydrateHeroImage(activeNode.querySelector('img[data-hero-src]'));
             nodes.forEach((el, i) => {
                 const on = i === this.current;
                 el.classList.toggle('is-active', on);
@@ -594,6 +652,17 @@
         }
     }
 
+    const AUDIENCE_IMG_WIDTHS = [320, 480, 600, 768, 900];
+    const AUDIENCE_IMG_SIZES = '(max-width: 600px) calc(100vw - 6.5rem), (max-width: 879px) calc(100vw - 8rem), 384px';
+
+    function audienceImage(src, alt) {
+        const safe = safeUrl(src, '');
+        if (!safe) return '';
+        const srcset = unsplashSrcset(safe, AUDIENCE_IMG_WIDTHS, '72');
+        const attrs = srcset ? ` srcset="${esc(srcset)}" sizes="${esc(AUDIENCE_IMG_SIZES)}"` : '';
+        return `<div class="audience__media"><img src="${esc(safe)}"${attrs} alt="${esc(alt || '')}" loading="lazy" decoding="async"></div>`;
+    }
+
     function applyAudience(block) {
         applyBlockHead('audience', block);
         const root = $('[data-block="audience"]');
@@ -611,7 +680,7 @@
                 <div id="${esc(id)}" class="audience__card reveal is-visible">
                     <div>
                         <span class="audience__tag">${esc(item.tag)}</span>
-                        ${item.image ? `<div class="audience__media"><img src="${esc(safeUrl(item.image, ''))}" alt="" loading="lazy"></div>` : ''}
+                        ${item.image ? audienceImage(item.image, item.image_alt) : ''}
                         <h3>${esc(item.title)}</h3>
                         <p>${esc(item.text)}</p>
                         <ul class="feature-list">${bullets}</ul>

@@ -1,0 +1,33 @@
+# Ardson Maritime API — Apache / LiteSpeed front controller
+# Upload this folder as-is to public_html/api/
+
+Options -Indexes
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Only the front controller and the one-time installer are real entry
+    # points. Everything else (including schema.sql, data/ and src/) is
+    # routed through index.php, which answers 404 for unknown paths.
+    RewriteCond %{REQUEST_URI} !/index\.php$
+    RewriteCond %{REQUEST_URI} !/install\.php$
+    RewriteRule ^ index.php [QSA,L]
+</IfModule>
+
+# Never serve private files even when rewriting is unavailable.
+<IfModule mod_authz_core.c>
+    <FilesMatch "^(config\.php|config\.example\.php|schema(?:\.sqlite)?\.sql|.*\.sqlite(?:-wal|-shm)?|.*\.lock)$">
+        Require all denied
+    </FilesMatch>
+</IfModule>
+<IfModule !mod_authz_core.c>
+    <FilesMatch "^(config\.php|config\.example\.php|schema(?:\.sqlite)?\.sql|.*\.sqlite(?:-wal|-shm)?|.*\.lock)$">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+</IfModule>
+
+# Block direct access to private folders (adjust the prefix if the API is
+# not installed at /api/).
+RedirectMatch 404 ^/api/(?:storage|data|src|routes)(?:/|$)

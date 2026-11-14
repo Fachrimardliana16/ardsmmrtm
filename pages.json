@@ -54,7 +54,10 @@
         "title": "Maritime Insight — Ardson Maritime Career Center",
         "desc": "Career guidance, certification checklists, and maritime industry analysis for seafarers and principals.",
         "priority": "0.8",
-        "changefreq": "weekly"
+        "changefreq": "weekly",
+        "preload": "https://images.unsplash.com/photo-1516214104703-d870798883c5?auto=format&amp;fit=crop&amp;q=72&amp;w=768",
+        "preloadSrcset": "https://images.unsplash.com/photo-1516214104703-d870798883c5?auto=format&amp;fit=crop&amp;q=72&amp;w=320 320w, https://images.unsplash.com/photo-1516214104703-d870798883c5?auto=format&amp;fit=crop&amp;q=72&amp;w=400 400w, https://images.unsplash.com/photo-1516214104703-d870798883c5?auto=format&amp;fit=crop&amp;q=72&amp;w=480 480w, https://images.unsplash.com/photo-1516214104703-d870798883c5?auto=format&amp;fit=crop&amp;q=72&amp;w=600 600w, https://images.unsplash.com/photo-1516214104703-d870798883c5?auto=format&amp;fit=crop&amp;q=72&amp;w=768 768w, https://images.unsplash.com/photo-1516214104703-d870798883c5?auto=format&amp;fit=crop&amp;q=72&amp;w=1000 1000w",
+        "preloadSizes": "(max-width: 799px) calc(100vw - 4.4rem), calc(50vw - 4rem)"
     },
     {
         "slug": "insight",

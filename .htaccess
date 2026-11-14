@@ -1,0 +1,68 @@
+# Ardson Maritime — Apache / LiteSpeed configuration for public_html/
+#
+# This file makes the plain static frontend behave like the old Express
+# server: security headers, private folders blocked, clean URLs and cache
+# headers. The PHP backend in /api/ has its own .htaccess.
+
+Options -Indexes
+DirectoryIndex index.html index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Private source / tooling folders. Nothing here is needed by visitors.
+    RewriteRule ^(?:\.git|\.preview|_pages|_partials|scripts|server|node_modules)(?:/|$) - [F,L,NC]
+
+    # CVs are personal data. They are only available through the
+    # authenticated /api/v1/admin/seafarers/{id}/cv endpoint.
+    RewriteRule ^uploads/cv(?:/|$) - [F,L,NC]
+
+    # Build notes and package metadata.
+    RewriteRule ^(?:pages\.json|package(?:-lock)?\.json)$ - [F,L,NC]
+    RewriteRule ^[^/]+\.md$ - [F,L,NC]
+
+    # Dotfiles (.env, .git, editor files), but keep ACME challenges working.
+    RewriteRule (^|/)\.(?!well-known/) - [F,L]
+
+    # Clean URLs: /about -> /about.html (Express did this automatically).
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME}\.html -f
+    RewriteRule ^(.+?)/?$ $1.html [L]
+</IfModule>
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "no-referrer"
+    Header always set X-DNS-Prefetch-Control "off"
+    Header always set X-Download-Options "noopen"
+    Header always set X-Permitted-Cross-Domain-Policies "none"
+    Header always set Origin-Agent-Cluster "?1"
+    Header always set Cross-Origin-Opener-Policy "same-origin"
+    Header always set Cross-Origin-Resource-Policy "same-origin"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), browsing-topics=()"
+    Header always set Content-Security-Policy "default-src 'self';script-src 'self' 'unsafe-inline' https://www.googletagmanager.com;style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;font-src 'self' data: https://fonts.gstatic.com;img-src 'self' data: https://images.unsplash.com https://www.googletagmanager.com https://*.google-analytics.com;media-src 'self' data: blob:;connect-src 'self' https://*.google-analytics.com https://www.googletagmanager.com;frame-src https://www.openstreetmap.org;object-src 'none';base-uri 'self';form-action 'self';frame-ancestors 'none'"
+    # css/js URLs carry ?v=<content hash>, so they are safe to pin for a year.
+    <FilesMatch "\.(css|js|woff2)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+</IfModule>
+
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml
+    AddOutputFilterByType DEFLATE application/javascript application/json
+    AddOutputFilterByType DEFLATE application/xml image/svg+xml
+</IfModule>
+
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/html "access plus 0 seconds"
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType image/png "access plus 30 days"
+    ExpiresByType image/jpeg "access plus 30 days"
+    ExpiresByType image/webp "access plus 30 days"
+    ExpiresByType image/svg+xml "access plus 30 days"
+    ExpiresByType font/woff2 "access plus 1 year"
+</IfModule>

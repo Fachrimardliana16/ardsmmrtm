@@ -32,6 +32,22 @@
 
     const money = (n, c = 'USD') => c + ' ' + Number(n).toLocaleString('en-US');
 
+    /** Build a width-descriptor srcset for Unsplash-hosted artwork. */
+    function unsplashSrcset(src, widths, quality) {
+        try {
+            const url = new URL(src, window.location.href);
+            if (url.hostname !== 'images.unsplash.com') return '';
+            return widths.map((width) => {
+                const candidate = new URL(url.href);
+                candidate.searchParams.set('q', quality);
+                candidate.searchParams.set('w', String(width));
+                return candidate.href + ' ' + width + 'w';
+            }).join(', ');
+        } catch (_e) {
+            return '';
+        }
+    }
+
     /** Vessel names arrive bare ("Horizon") or prefixed ("MV Horizon"). */
     const vesselLabel = (name) => {
         if (!name) return '';
@@ -667,9 +683,46 @@
                     return;
                 }
 
-                grid.innerHTML = list.map((article) => `
+                // The static fallback already matches the published list on a
+                // first visit. Replacing it would throw away the eagerly loaded
+                // LCP image, so only rebuild when the rendered content differs.
+                const imageKey = (src) => String(src || '')
+                    .replace(/^https?:\/\/images\.unsplash\.com\//, '')
+                    .split('?')[0];
+                const signature = (title, lede, meta, image) => [
+                    String(title || '').trim(),
+                    String(lede || '').trim(),
+                    meta.map((part) => String(part || '').replace(/\s+/g, ' ').trim()).join('|'),
+                    imageKey(image)
+                ].join('\u0000');
+                const currentCards = $$('article.insight', grid).map((el) => signature(
+                    $('h3', el)?.textContent,
+                    $('p', el)?.textContent,
+                    $$('.insight__meta span', el).map((s) => s.textContent),
+                    $('.insight__media img', el)?.getAttribute('src')
+                ));
+                const nextCards = list.map((a) => signature(
+                    a.title,
+                    a.lede,
+                    [a.tag, `${formatDate(a.date)} · ${a.read || ''}`],
+                    a.image
+                ));
+                const unchanged = currentCards.length === nextCards.length
+                    && currentCards.every((card, i) => card === nextCards[i]);
+                if (unchanged) {
+                    $$('.reveal', grid).forEach((el) => el.classList.add('is-visible'));
+                    return;
+                }
+
+                grid.innerHTML = list.map((article, i) => {
+                    const srcset = unsplashSrcset(article.image, [320, 400, 480, 600, 768, 1000], '72');
+                    const imgAttrs = srcset
+                        ? ` srcset="${escapeHtml(srcset)}" sizes="(max-width: 799px) calc(100vw - 4.4rem), calc(50vw - 4rem)"`
+                        : '';
+                    const loadAttr = i === 0 ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"';
+                    return `
                     <article class="insight reveal">
-                        ${article.image ? `<div class="insight__media"><img src="${escapeHtml(article.image)}" alt="" loading="lazy"></div>` : ''}
+                        ${article.image ? `<div class="insight__media"><img src="${escapeHtml(article.image)}"${imgAttrs} alt="" ${loadAttr} decoding="async"></div>` : ''}
                         <div class="insight__body">
                             <div class="insight__meta">
                                 <span>${escapeHtml(article.tag)}</span>
@@ -682,8 +735,8 @@
                                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
                             </a>
                         </div>
-                    </article>
-                `).join('');
+                    </article>`;
+                }).join('');
 
                 $$('.reveal', grid).forEach((el) => el.classList.add('is-visible'));
             })

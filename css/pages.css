@@ -78,6 +78,11 @@
 
 /* ---------- Page sections ---------- */
 .page-section { padding: 5rem 0; }
+@media (max-width: 640px) {
+    .page-section { padding: 3.25rem 0; }
+    .page-hero { padding: 6.5rem 0 3rem; }
+    .page-sec-head { margin-bottom: 2rem; }
+}
 .page-section--tint { background: var(--sea-50); }
 .page-section--line { border-bottom: 1px solid var(--line); }
 .page-section--dark { background: var(--sea-900); color: #fff; }

@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/styles.css?v=1ccf599adf">
     <style>
         body { background: var(--sea-950); }
         .auth-wrap {
@@ -58,17 +58,14 @@
             font-size: 0.75rem;
             letter-spacing: 0.04em;
         }
-        .auth-demo {
-            margin-top: 1.5rem;
-            padding: 0.8rem 0.9rem;
-            background: var(--sea-50);
-            border: 1px solid var(--sea-200);
-            border-radius: var(--r-sm);
-            font-size: 0.75rem;
-            color: var(--ink-soft);
-            line-height: 1.6;
+        .auth-meta a { color: rgba(255, 255, 255, 0.8); text-decoration: underline; text-underline-offset: 2px; }
+        .auth-alt {
+            margin: 1rem 0 0;
+            font-size: 0.8rem;
+            color: var(--muted);
         }
-        .auth-demo code { font-family: "SF Mono", ui-monospace, Menlo, monospace; color: var(--sea-700); }
+        .auth-alt a { color: var(--sea-700); text-decoration: none; }
+        .auth-alt a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -99,10 +96,10 @@
                 <button type="submit" class="btn btn--primary btn--block" id="admin-login-btn">Sign in</button>
             </form>
 
-            <div class="auth-demo">
-                <strong>Demo credentials</strong> — configured via <code>ADMIN_USER</code> / <code>ADMIN_PASSWORD</code>.<br>
-                Default: <code>admin@ardsonmaritime.com</code> / <code>ardson-admin-2026</code>
-            </div>
+            <p class="auth-alt" id="admin-existing-session" hidden>
+                Already signed in. <a href="index.html">Continue to the admin console</a>.
+            </p>
+            <p class="auth-alt"><a href="../index.html">&larr; Back to website</a></p>
         </div>
 
         <p class="auth-meta">&copy; <span data-year>2026</span> Ardson Maritime Career Center · Internal system</p>
@@ -112,10 +109,14 @@
 
     <script>
         window.ARDSON_ADMIN_CONFIG = { apiBase: '/api/v1/admin', home: 'index.html' };
+        // Never bounce away from the sign-in form automatically: a stale token
+        // used to send visitors straight back to the console (or the public home
+        // page when the admin index was missing). Offer a link instead.
         if (sessionStorage.getItem('ardson_admin_token')) {
-            window.location.replace('index.html');
+            var note = document.getElementById('admin-existing-session');
+            if (note) note.hidden = false;
         }
     </script>
-    <script src="../js/admin.js" defer></script>
+    <script src="../js/admin.js?v=1ccf599adf" defer></script>
 </body>
 </html>
